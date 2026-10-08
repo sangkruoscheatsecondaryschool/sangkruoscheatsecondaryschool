@@ -1,0 +1,28 @@
+{
+  "districts": [
+    { "code": "1201", "province_code": "12", "name_kh": "ខណ្ឌចំការមន", "name_en": "Chamkar Mon" },
+    { "code": "1202", "province_code": "12", "name_kh": "ខណ្ឌដូនពេញ", "name_en": "Doun Penh" },
+    { "code": "1203", "province_code": "12", "name_kh": "ខណ្ឌ៧មករា", "name_en": "Prampir Meakkakra" },
+    { "code": "1204", "province_code": "12", "name_kh": "ខណ្ឌទួលគោក", "name_en": "Tuol Kouk" },
+    { "code": "1205", "province_code": "12", "name_kh": "ខណ្ឌដង្កោ", "name_en": "Dangkao" }
+  ],
+  "communes": [
+    { "code": "120101", "district_code": "1201", "name_kh": "សង្កាត់ទន្លេបាសាក់", "name_en": "Tonle Basak" },
+    { "code": "120102", "district_code": "1201", "name_kh": "សង្កាត់បឹងកេងកង", "name_en": "Boeng Keng Kang" },
+    { "code": "120201", "district_code": "1202", "name_kh": "សង្កាត់ផ្សារកណ្តាល", "name_en": "Phsar Kandal" },
+    { "code": "120202", "district_code": "1202", "name_kh": "សង្កាត់ជ័យជំនះ", "name_en": "Chey Chumneas" },
+    { "code": "120301", "district_code": "1203", "name_kh": "សង្កាត់មិត្តភាព", "name_en": "Mittapheap" },
+    { "code": "120401", "district_code": "1204", "name_kh": "សង្កាត់ទួលសង្កែ", "name_en": "Tuol Sangkae" },
+    { "code": "120402", "district_code": "1204", "name_kh": "សង្កាត់បឹងសាឡាង", "name_en": "Boeng Salang" }
+  ],
+  "villages": [
+    { "code": "12010101", "commune_code": "120101", "name_kh": "ភូមិ១", "name_en": "Village 1" },
+    { "code": "12010102", "commune_code": "120101", "name_kh": "ភូមិ២", "name_en": "Village 2" },
+    { "code": "12010201", "commune_code": "120102", "name_kh": "ភូមិ១", "name_en": "Village 1" },
+    { "code": "12020101", "commune_code": "120201", "name_kh": "ភូមិ១", "name_en": "Village 1" },
+    { "code": "12020201", "commune_code": "120202", "name_kh": "ភូមិ១", "name_en": "Village 1" },
+    { "code": "12030101", "commune_code": "120301", "name_kh": "ភូមិ១", "name_en": "Village 1" },
+    { "code": "12040101", "commune_code": "120401", "name_kh": "ភូមិ១", "name_en": "Village 1" },
+    { "code": "12040201", "commune_code": "120402", "name_kh": "ភូមិ១", "name_en": "Village 1" }
+  ]
+}

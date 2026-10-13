@@ -17,6 +17,16 @@ const items = [
     desc: "ថ្នាក់ និងគ្រូបន្ទុកថ្នាក់",
   },
   {
+    href: "/admin/teachers",
+    title: "គ្រូបង្រៀន",
+    desc: "ព័ត៌មានគ្រូ និងមុខវិជ្ជាជំនាញ",
+  },
+  {
+    href: "/admin/teacher-assignments",
+    title: "ការចាត់តាំងគ្រូ",
+    desc: "គ្រូ · ថ្នាក់ · មុខវិជ្ជា",
+  },
+  {
     href: "/admin/students",
     title: "សិស្ស",
     desc: "បញ្ជីសិស្ស និងលេខកូដ",

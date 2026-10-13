@@ -27,6 +27,14 @@ export interface Database {
           full_name_kh: string;
           full_name_en: string | null;
           role: UserRole;
+          gender: string | null;
+          dob: string | null;
+          phone: string | null;
+          contact_address_code: string | null;
+          joined_date: string | null;
+          specialist_1_subject_id: string | null;
+          specialist_2_subject_id: string | null;
+          notes: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -35,6 +43,14 @@ export interface Database {
           full_name_kh: string;
           full_name_en?: string | null;
           role?: UserRole;
+          gender?: string | null;
+          dob?: string | null;
+          phone?: string | null;
+          contact_address_code?: string | null;
+          joined_date?: string | null;
+          specialist_1_subject_id?: string | null;
+          specialist_2_subject_id?: string | null;
+          notes?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -329,6 +345,53 @@ export interface Database {
         >;
         Relationships: [];
       };
+      salary_positions: {
+        Row: {
+          id: string;
+          cadre_code: string;
+          class_number: number;
+          rank_number: number | null;
+          display_label: string;
+          sort_order: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          cadre_code: string;
+          class_number: number;
+          rank_number?: number | null;
+          display_label: string;
+          sort_order: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["salary_positions"]["Insert"]>;
+        Relationships: [];
+      };
+      teacher_salary_history: {
+        Row: {
+          id: string;
+          teacher_id: string;
+          position_id: string;
+          start_date: string;
+          end_date: string | null;
+          decision_number: string | null;
+          notes: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          teacher_id: string;
+          position_id: string;
+          start_date: string;
+          end_date?: string | null;
+          decision_number?: string | null;
+          notes?: string | null;
+          created_by?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["teacher_salary_history"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: {
       v_student_scores: {
@@ -539,6 +602,55 @@ export interface Database {
           student_code: string | null;
           error: string | null;
         }[];
+      };
+      sync_teacher_assignments: {
+        Args: {
+          p_teacher_id: string;
+          p_class_subjects: unknown;
+        };
+        Returns: undefined;
+      };
+      delete_teacher_assignment: {
+        Args: { p_id: string };
+        Returns: undefined;
+      };
+      update_teacher_profile: {
+        Args: {
+          p_teacher_id: string;
+          p_full_name_kh: string;
+          p_full_name_en: string | null;
+          p_gender: string | null;
+          p_dob: string | null;
+          p_phone: string | null;
+          p_contact_address_code: string | null;
+          p_joined_date: string | null;
+          p_specialist_1_subject_id: string | null;
+          p_specialist_2_subject_id: string | null;
+          p_notes: string | null;
+        };
+        Returns: undefined;
+      };
+      can_delete_teacher: {
+        Args: { p_teacher_id: string };
+        Returns: boolean;
+      };
+      get_user_emails: {
+        Args: { p_ids: string[] };
+        Returns: { id: string; email: string }[];
+      };
+      add_salary_promotion: {
+        Args: {
+          p_teacher_id: string;
+          p_position_id: string;
+          p_start_date: string;
+          p_decision_number: string | null;
+          p_notes: string | null;
+        };
+        Returns: string;
+      };
+      delete_current_salary_position: {
+        Args: { p_history_id: string };
+        Returns: undefined;
       };
     };
     Enums: {

@@ -126,8 +126,8 @@ export interface Database {
           dob: string;
           class_id: string;
           access_token: string;
-          place_of_birth_village_id: string | null;
-          current_address_village_id: string | null;
+          place_of_birth_code: string | null;
+          current_address_code: string | null;
           current_address_detail: string | null;
           mother_name: string | null;
           father_name: string | null;
@@ -144,8 +144,8 @@ export interface Database {
           dob: string;
           class_id: string;
           access_token?: string;
-          place_of_birth_village_id?: string | null;
-          current_address_village_id?: string | null;
+          place_of_birth_code?: string | null;
+          current_address_code?: string | null;
           current_address_detail?: string | null;
           mother_name?: string | null;
           father_name?: string | null;
@@ -495,8 +495,8 @@ export interface Database {
           p_name_kh: string;
           p_gender: string | null;
           p_dob: string;
-          p_place_of_birth_village_id: string | null;
-          p_current_address_village_id: string | null;
+          p_place_of_birth_code: string | null;
+          p_current_address_code: string | null;
           p_current_address_detail: string | null;
           p_mother_name: string | null;
           p_father_name: string | null;
@@ -513,8 +513,8 @@ export interface Database {
           p_name_kh: string;
           p_gender: string | null;
           p_dob: string;
-          p_place_of_birth_village_id: string | null;
-          p_current_address_village_id: string | null;
+          p_place_of_birth_code: string | null;
+          p_current_address_code: string | null;
           p_current_address_detail: string | null;
           p_mother_name: string | null;
           p_father_name: string | null;
@@ -523,9 +523,22 @@ export interface Database {
         };
         Returns: undefined;
       };
+      resolve_address: {
+        Args: { p_code: string };
+        Returns: unknown;
+      };
       delete_student_safe: {
         Args: { p_student_id: string };
         Returns: undefined;
+      };
+      bulk_create_students: {
+        Args: { p_rows: unknown };
+        Returns: {
+          row_index: number;
+          ok: boolean;
+          student_code: string | null;
+          error: string | null;
+        }[];
       };
     };
     Enums: {

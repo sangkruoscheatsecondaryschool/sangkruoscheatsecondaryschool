@@ -1,7 +1,7 @@
 "use client";
 
 import type { ClassOption } from "@/lib/admin/students/queries";
-import type { ProvinceOption } from "@/lib/admin/students/address-queries";
+import type { AdminUnit } from "@/lib/admin/students/address-queries";
 import { CascadingAddressPicker } from "@/components/cascading-address-picker";
 
 export type StudentDefaults = {
@@ -10,8 +10,8 @@ export type StudentDefaults = {
   gender?: string | null;
   dob?: string;
   class_id?: string;
-  place_of_birth_village_id?: string | null;
-  current_address_village_id?: string | null;
+  place_of_birth_code?: string | null;
+  current_address_code?: string | null;
   current_address_detail?: string | null;
   mother_name?: string | null;
   father_name?: string | null;
@@ -25,7 +25,7 @@ export function StudentFields({
   defaults,
 }: {
   classes: ClassOption[];
-  provinces: ProvinceOption[];
+  provinces: AdminUnit[];
   defaults?: StudentDefaults;
 }) {
   return (
@@ -143,17 +143,17 @@ export function StudentFields({
         </h3>
 
         <CascadingAddressPicker
-          name="place_of_birth_village_id"
+          name="place_of_birth_code"
           label="ទីកន្លែងកំណើត"
           provinces={provinces}
-          defaultValue={defaults?.place_of_birth_village_id}
+          defaultValue={defaults?.place_of_birth_code}
         />
 
         <CascadingAddressPicker
-          name="current_address_village_id"
+          name="current_address_code"
           label="អាសយដ្ឋានបច្ចុប្បន្ន"
           provinces={provinces}
-          defaultValue={defaults?.current_address_village_id}
+          defaultValue={defaults?.current_address_code}
         />
 
         <div>

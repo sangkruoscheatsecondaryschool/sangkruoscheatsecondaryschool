@@ -10,8 +10,8 @@ export type StudentRow = {
   class_id: string;
   class_name: string;
   grade_level: number;
-  place_of_birth_village_id: string | null;
-  current_address_village_id: string | null;
+  place_of_birth_code: string | null;
+  current_address_code: string | null;
   current_address_detail: string | null;
   mother_name: string | null;
   father_name: string | null;
@@ -68,7 +68,7 @@ export async function listStudentsByYear(
   let studentQuery = supabase
     .from("students")
     .select(
-      "id, student_code, name_kh, gender, dob, class_id, place_of_birth_village_id, current_address_village_id, current_address_detail, mother_name, father_name, contact_number, status",
+      "id, student_code, name_kh, gender, dob, class_id, place_of_birth_code, current_address_code, current_address_detail, mother_name, father_name, contact_number, status",
     )
     .in("class_id", classIds)
     .order("student_code", { ascending: true });
@@ -100,7 +100,7 @@ export async function getStudentById(id: string): Promise<StudentRow | null> {
   const { data: student, error } = await supabase
     .from("students")
     .select(
-      "id, student_code, name_kh, gender, dob, class_id, place_of_birth_village_id, current_address_village_id, current_address_detail, mother_name, father_name, contact_number, status",
+      "id, student_code, name_kh, gender, dob, class_id, place_of_birth_code, current_address_code, current_address_detail, mother_name, father_name, contact_number, status",
     )
     .eq("id", id)
     .maybeSingle();

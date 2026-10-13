@@ -5,7 +5,7 @@ import type { ActionResult } from "@/lib/actions/types";
 import type { ClassOption } from "@/lib/admin/students/queries";
 import { createStudentAction } from "@/lib/admin/students/actions";
 import { StudentFields } from "../student-fields";
-import type { ProvinceOption } from "@/lib/admin/students/address-queries";
+import type { AdminUnit } from "@/lib/admin/students/address-queries";
 
 export function NewStudentForm({
   yearId,
@@ -15,7 +15,7 @@ export function NewStudentForm({
 }: {
   yearId: string;
   classes: ClassOption[];
-  provinces: ProvinceOption[];
+  provinces: AdminUnit[];
   defaultClassId?: string;
 }) {
   const [state, action, pending] = useActionState<

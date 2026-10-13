@@ -6,7 +6,7 @@ import type { ActionResult } from "@/lib/actions/types";
 import type { ClassOption } from "@/lib/admin/students/queries";
 import { updateStudentAction } from "@/lib/admin/students/actions";
 import { StudentFields, type StudentDefaults } from "../student-fields";
-import type { ProvinceOption } from "@/lib/admin/students/address-queries";
+import type { AdminUnit } from "@/lib/admin/students/address-queries";
 
 export function EditStudentForm({
   studentId,
@@ -18,7 +18,7 @@ export function EditStudentForm({
   studentId: string;
   yearName: string;
   classes: ClassOption[];
-  provinces: ProvinceOption[];
+  provinces: AdminUnit[];
   defaults: StudentDefaults;
 }) {
   const router = useRouter();

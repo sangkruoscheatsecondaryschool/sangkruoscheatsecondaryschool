@@ -21,30 +21,24 @@ const nullableString = (max: number) =>
     .transform((v) => (v === "" || v === null ? null : v))
     .refine((v) => v === null || v.length <= max, "វាយអក្សរវែងពេក។");
 
-const nullableId = z
+const nullableCode = z
   .union([z.string(), z.literal(""), z.null()])
   .transform((v) => (v === "" || v === null ? null : v))
   .refine(
-    (v) => v === null || /^[0-9a-fA-F-]{36}$/.test(v),
-    "លេខសម្គាល់មិនត្រឹមត្រូវ។",
+    (v) => v === null || /^[0-9]{2}([0-9]{2}){0,3}$/.test(v),
+    "លេខកូដអាសយដ្ឋានមិនត្រឹមត្រូវ។",
   );
 
 const baseFields = {
   class_id: idSchema,
-  student_code: z
-    .string()
-    .trim()
-    .min(1, "សូមបញ្ចូលលេខកូដសិស្ស។")
-    .max(30),
+  student_code: z.string().trim().min(1, "សូមបញ្ចូលលេខកូដសិស្ស។").max(30),
   name_kh: z.string().trim().min(1, "សូមបញ្ចូលឈ្មោះសិស្ស។").max(150),
   gender: z
     .union([z.literal("M"), z.literal("F"), z.literal(""), z.null()])
     .transform((v) => (v === "" ? null : v)),
-  dob: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "សូមបញ្ចូលថ្ងៃខែឆ្នាំកំណើតត្រឹមត្រូវ។"),
-  place_of_birth_village_id: nullableId,
-  current_address_village_id: nullableId,
+  dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "សូមបញ្ចូលថ្ងៃខែឆ្នាំកំណើតត្រឹមត្រូវ។"),
+  place_of_birth_code: nullableCode,
+  current_address_code: nullableCode,
   current_address_detail: nullableString(200),
   mother_name: nullableString(150),
   father_name: nullableString(150),
@@ -70,8 +64,8 @@ export async function createStudentAction(
     name_kh: formData.get("name_kh"),
     gender: formData.get("gender"),
     dob: formData.get("dob"),
-    place_of_birth_village_id: formData.get("place_of_birth_village_id"),
-    current_address_village_id: formData.get("current_address_village_id"),
+    place_of_birth_code: formData.get("place_of_birth_code"),
+    current_address_code: formData.get("current_address_code"),
     current_address_detail: formData.get("current_address_detail"),
     mother_name: formData.get("mother_name"),
     father_name: formData.get("father_name"),
@@ -87,9 +81,9 @@ export async function createStudentAction(
   }
 
   // If current address not specified, default to place of birth
-  const currentVillage =
-    parsed.data.current_address_village_id ??
-    parsed.data.place_of_birth_village_id;
+  const currentCode =
+    parsed.data.current_address_code ??
+    parsed.data.place_of_birth_code;
 
   const supabase = await createClient();
   const { error } = await supabase.rpc("create_student", {
@@ -98,8 +92,8 @@ export async function createStudentAction(
     p_name_kh: parsed.data.name_kh,
     p_gender: parsed.data.gender,
     p_dob: parsed.data.dob,
-    p_place_of_birth_village_id: parsed.data.place_of_birth_village_id,
-    p_current_address_village_id: currentVillage,
+    p_place_of_birth_code: parsed.data.place_of_birth_code,
+    p_current_address_code: currentCode,
     p_current_address_detail: parsed.data.current_address_detail,
     p_mother_name: parsed.data.mother_name,
     p_father_name: parsed.data.father_name,
@@ -134,8 +128,8 @@ export async function updateStudentAction(
     name_kh: formData.get("name_kh"),
     gender: formData.get("gender"),
     dob: formData.get("dob"),
-    place_of_birth_village_id: formData.get("place_of_birth_village_id"),
-    current_address_village_id: formData.get("current_address_village_id"),
+    place_of_birth_code: formData.get("place_of_birth_code"),
+    current_address_code: formData.get("current_address_code"),
     current_address_detail: formData.get("current_address_detail"),
     mother_name: formData.get("mother_name"),
     father_name: formData.get("father_name"),
@@ -150,9 +144,9 @@ export async function updateStudentAction(
     };
   }
 
-  const currentVillage =
-    parsed.data.current_address_village_id ??
-    parsed.data.place_of_birth_village_id;
+  const currentCode =
+    parsed.data.current_address_code ??
+    parsed.data.place_of_birth_code;
 
   const supabase = await createClient();
   const { error } = await supabase.rpc("update_student", {
@@ -162,8 +156,8 @@ export async function updateStudentAction(
     p_name_kh: parsed.data.name_kh,
     p_gender: parsed.data.gender,
     p_dob: parsed.data.dob,
-    p_place_of_birth_village_id: parsed.data.place_of_birth_village_id,
-    p_current_address_village_id: currentVillage,
+    p_place_of_birth_code: parsed.data.place_of_birth_code,
+    p_current_address_code: currentCode,
     p_current_address_detail: parsed.data.current_address_detail,
     p_mother_name: parsed.data.mother_name,
     p_father_name: parsed.data.father_name,

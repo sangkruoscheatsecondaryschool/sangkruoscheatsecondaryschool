@@ -79,14 +79,32 @@ export default async function StudentsPage({
       ) : null}
 
       {activeYear ? (
-        <Link
-          href={`/admin/students/new?year=${activeYear.id}${
-            validClassId ? `&class=${validClassId}` : ""
-          }`}
-          className="touch-target rounded-btn bg-brand-600 mb-4 flex w-full items-center justify-center px-4 font-medium text-white active:bg-brand-700"
-        >
-          + បន្ថែមសិស្សថ្មី
-        </Link>
+        <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <Link
+            href={`/admin/students/new?year=${activeYear.id}${
+              validClassId ? `&class=${validClassId}` : ""
+            }`}
+            className="touch-target rounded-btn bg-brand-600 flex items-center justify-center px-4 font-medium text-white active:bg-brand-700"
+          >
+            + បន្ថែមសិស្សថ្មី
+          </Link>
+
+          <Link
+            href="/admin/students/import"
+            className="touch-target rounded-btn border-border bg-surface flex items-center justify-center border px-4 font-medium active:bg-slate-50"
+          >
+            📥 នាំចូល Excel
+          </Link>
+
+          <a
+            href={`/api/admin/students/export?year=${activeYear.id}${
+              validClassId ? `&class=${validClassId}` : ""
+            }${sp.q ? `&q=${encodeURIComponent(sp.q)}` : ""}`}
+            className="touch-target rounded-btn border-border bg-surface flex items-center justify-center border px-4 font-medium active:bg-slate-50"
+          >
+            📤 ទាញយក Excel
+          </a>
+        </div>
       ) : null}
 
       {!activeYear ? (

@@ -1,24 +1,19 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
-import type {
-  CommuneOption,
-  DistrictOption,
-  ProvinceOption,
-  VillageOption,
-} from "@/lib/admin/students/address-queries";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import type { AdminUnit } from "@/lib/admin/students/address-queries";
 import {
+  loadAddressChainAction,
   loadCommunesAction,
   loadDistrictsAction,
   loadVillagesAction,
-  loadVillageAncestryAction,
 } from "@/lib/admin/students/address-actions";
 
 type Props = {
-  name: string; // form field name — submits the village UUID
+  name: string;
   label?: string;
-  provinces: ProvinceOption[];
-  defaultValue?: string | null; // pre-selected village id
+  provinces: AdminUnit[]; // server-rendered, cached
+  defaultValue?: string | null; // an address code, length 2/4/6/8
   required?: boolean;
 };
 
@@ -34,14 +29,13 @@ export function CascadingAddressPicker({
   const [communeId, setCommuneId] = useState("");
   const [villageId, setVillageId] = useState("");
 
-  const [districts, setDistricts] = useState<DistrictOption[]>([]);
-  const [communes, setCommunes] = useState<CommuneOption[]>([]);
-  const [villages, setVillages] = useState<VillageOption[]>([]);
-
+  const [districts, setDistricts] = useState<AdminUnit[]>([]);
+  const [communes, setCommunes] = useState<AdminUnit[]>([]);
+  const [villages, setVillages] = useState<AdminUnit[]>([]);
   const [hydrating, setHydrating] = useState(Boolean(defaultValue));
   const [, startTransition] = useTransition();
 
-  // Initial hydration from defaultValue
+  // Hydrate from a code — one server action returns everything.
   useEffect(() => {
     if (!defaultValue) {
       setHydrating(false);
@@ -49,24 +43,21 @@ export function CascadingAddressPicker({
     }
     let cancelled = false;
     (async () => {
-      const ancestry = await loadVillageAncestryAction(defaultValue);
-      if (cancelled || !ancestry) {
-        setHydrating(false);
-        return;
-      }
-      const [ds, cs, vs] = await Promise.all([
-        loadDistrictsAction(ancestry.province_id),
-        loadCommunesAction(ancestry.district_id),
-        loadVillagesAction(ancestry.commune_id),
-      ]);
+      const chain = await loadAddressChainAction(defaultValue);
       if (cancelled) return;
-      setProvinceId(ancestry.province_id);
-      setDistrictId(ancestry.district_id);
-      setCommuneId(ancestry.commune_id);
-      setVillageId(ancestry.village_id);
-      setDistricts(ds);
-      setCommunes(cs);
-      setVillages(vs);
+      setDistricts(chain.districts);
+      setCommunes(chain.communes);
+      setVillages(chain.villages);
+
+      const code = defaultValue;
+      const p = chain.provinces.find((x) => x.code === code.slice(0, 2));
+      const d = chain.districts.find((x) => x.code === code.slice(0, 4));
+      const c = chain.communes.find((x) => x.code === code.slice(0, 6));
+      const v = chain.villages.find((x) => x.code === code.slice(0, 8));
+      setProvinceId(p?.id ?? "");
+      setDistrictId(d?.id ?? "");
+      setCommuneId(c?.id ?? "");
+      setVillageId(v?.id ?? "");
       setHydrating(false);
     })();
     return () => {
@@ -74,6 +65,36 @@ export function CascadingAddressPicker({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultValue]);
+
+  // Compute the address code from the deepest non-empty selection.
+  const computedCode = useMemo(() => {
+    if (villageId) {
+      const v = villages.find((x) => x.id === villageId);
+      if (v) return v.code;
+    }
+    if (communeId) {
+      const c = communes.find((x) => x.id === communeId);
+      if (c) return c.code;
+    }
+    if (districtId) {
+      const d = districts.find((x) => x.id === districtId);
+      if (d) return d.code;
+    }
+    if (provinceId) {
+      const p = provinces.find((x) => x.id === provinceId);
+      if (p) return p.code;
+    }
+    return "";
+  }, [
+    villageId,
+    communeId,
+    districtId,
+    provinceId,
+    villages,
+    communes,
+    districts,
+    provinces,
+  ]);
 
   const onProvinceChange = (v: string) => {
     setProvinceId(v);
@@ -119,12 +140,13 @@ export function CascadingAddressPicker({
 
       <div>
         <label className="text-muted mb-1 block text-[11px] font-medium uppercase">
-          ខេត្ត/ក្រុង
+          ខេត្ត/ក្រុង {required ? <span className="text-red-600">*</span> : null}
         </label>
         <select
           value={provinceId}
           onChange={(e) => onProvinceChange(e.target.value)}
           disabled={disabled}
+          required={required}
           className="rounded-btn border-border bg-surface w-full border px-3 py-2.5 text-sm disabled:opacity-60"
         >
           <option value="">— ជ្រើសរើសខេត្ត/ក្រុង —</option>
@@ -205,16 +227,15 @@ export function CascadingAddressPicker({
         </select>
       </div>
 
-      {/* The actual form value */}
-      <input
-        type="hidden"
-        name={name}
-        value={villageId}
-        required={required && Boolean(villageId) === false ? false : undefined}
-      />
-      {required && !villageId && !hydrating ? (
+      <input type="hidden" name={name} value={computedCode} />
+
+      {computedCode ? (
+        <p className="text-muted text-xs">
+          លេខកូដអាសយដ្ឋាន៖ <span className="font-mono">{computedCode}</span>
+        </p>
+      ) : required ? (
         <p className="text-xs text-amber-700">
-          សូមជ្រើសរើសអាសយដ្ឋានឲ្យបានពេញលេញ។
+          សូមជ្រើសរើសខេត្តយ៉ាងតិច។
         </p>
       ) : null}
     </div>

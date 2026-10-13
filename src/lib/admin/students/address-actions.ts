@@ -4,37 +4,42 @@ import {
   listDistricts,
   listCommunes,
   listVillages,
-  getVillageAncestry,
-  type DistrictOption,
-  type CommuneOption,
-  type VillageOption,
-  type VillageAncestry,
+  loadAddressChain,
+  resolveAddress,
+  type AdminUnit,
+  type AddressChain,
+  type AddressDisplay,
 } from "./address-queries";
 
 export async function loadDistrictsAction(
   provinceId: string,
-): Promise<DistrictOption[]> {
+): Promise<AdminUnit[]> {
   if (!provinceId) return [];
   return listDistricts(provinceId);
 }
 
 export async function loadCommunesAction(
   districtId: string,
-): Promise<CommuneOption[]> {
+): Promise<AdminUnit[]> {
   if (!districtId) return [];
   return listCommunes(districtId);
 }
 
 export async function loadVillagesAction(
   communeId: string,
-): Promise<VillageOption[]> {
+): Promise<AdminUnit[]> {
   if (!communeId) return [];
   return listVillages(communeId);
 }
 
-export async function loadVillageAncestryAction(
-  villageId: string,
-): Promise<VillageAncestry | null> {
-  if (!villageId) return null;
-  return getVillageAncestry(villageId);
+export async function loadAddressChainAction(
+  code: string | null,
+): Promise<AddressChain> {
+  return loadAddressChain(code);
+}
+
+export async function resolveAddressAction(
+  code: string | null,
+): Promise<AddressDisplay | null> {
+  return resolveAddress(code);
 }

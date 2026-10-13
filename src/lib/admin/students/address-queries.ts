@@ -1,18 +1,23 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 
-export type ProvinceOption = {
+export type AdminUnit = {
   id: string;
   code: string;
   name_kh: string;
   name_en: string;
 };
 
-export type DistrictOption = ProvinceOption & { province_id: string };
-export type CommuneOption = ProvinceOption & { district_id: string };
-export type VillageOption = ProvinceOption & { commune_id: string };
+export type AddressDisplay = {
+  level: "province" | "district" | "commune" | "village";
+  code: string;
+  village_name_kh: string | null;
+  commune_name_kh: string | null;
+  district_name_kh: string | null;
+  province_name_kh: string;
+};
 
-export async function listProvinces(): Promise<ProvinceOption[]> {
+export async function listProvinces(): Promise<AdminUnit[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("provinces")
@@ -24,133 +29,102 @@ export async function listProvinces(): Promise<ProvinceOption[]> {
 
 export async function listDistricts(
   provinceId: string,
-): Promise<DistrictOption[]> {
+): Promise<AdminUnit[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("districts")
-    .select("id, code, name_kh, name_en, province_id")
+    .select("id, code, name_kh, name_en")
     .eq("province_id", provinceId)
     .order("code", { ascending: true });
   if (error) throw new Error(error.message);
   return data ?? [];
 }
 
-export async function listCommunes(
-  districtId: string,
-): Promise<CommuneOption[]> {
+export async function listCommunes(districtId: string): Promise<AdminUnit[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("communes")
-    .select("id, code, name_kh, name_en, district_id")
+    .select("id, code, name_kh, name_en")
     .eq("district_id", districtId)
     .order("code", { ascending: true });
   if (error) throw new Error(error.message);
   return data ?? [];
 }
 
-export async function listVillages(
-  communeId: string,
-): Promise<VillageOption[]> {
+export async function listVillages(communeId: string): Promise<AdminUnit[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("villages")
-    .select("id, code, name_kh, name_en, commune_id")
+    .select("id, code, name_kh, name_en")
     .eq("commune_id", communeId)
     .order("code", { ascending: true });
   if (error) throw new Error(error.message);
   return data ?? [];
 }
 
-export type VillageAncestry = {
-  province_id: string;
-  district_id: string;
-  commune_id: string;
-  village_id: string;
-};
-
-export async function getVillageAncestry(
-  villageId: string,
-): Promise<VillageAncestry | null> {
+// =========================================================
+// Resolve a code into the display structure.
+// Uses the SQL function for one round-trip.
+// =========================================================
+export async function resolveAddress(
+  code: string | null,
+): Promise<AddressDisplay | null> {
+  if (!code || code.length < 2) return null;
   const supabase = await createClient();
-
-  const { data: village, error: vErr } = await supabase
-    .from("villages")
-    .select("id, commune_id")
-    .eq("id", villageId)
-    .maybeSingle();
-  if (vErr) throw new Error(vErr.message);
-  if (!village) return null;
-
-  const { data: commune, error: cErr } = await supabase
-    .from("communes")
-    .select("id, district_id")
-    .eq("id", village.commune_id)
-    .maybeSingle();
-  if (cErr) throw new Error(cErr.message);
-  if (!commune) return null;
-
-  const { data: district, error: dErr } = await supabase
-    .from("districts")
-    .select("id, province_id")
-    .eq("id", commune.district_id)
-    .maybeSingle();
-  if (dErr) throw new Error(dErr.message);
-  if (!district) return null;
-
-  return {
-    province_id: district.province_id,
-    district_id: district.id,
-    commune_id: commune.id,
-    village_id: village.id,
-  };
+  const { data, error } = await supabase.rpc("resolve_address", {
+    p_code: code,
+  });
+  if (error || !data) return null;
+  return data as AddressDisplay;
 }
 
-export type AddressDisplay = {
-  village_name_kh: string;
-  commune_name_kh: string;
-  district_name_kh: string;
-  province_name_kh: string;
+// =========================================================
+// One-shot chain loader: given a partial code, return
+// the lists needed to hydrate the picker.
+// =========================================================
+export type AddressChain = {
+  provinces: AdminUnit[];
+  districts: AdminUnit[];
+  communes: AdminUnit[];
+  villages: AdminUnit[];
 };
 
-export async function getVillageAddressDisplay(
-  villageId: string | null,
-): Promise<AddressDisplay | null> {
-  if (!villageId) return null;
-  const supabase = await createClient();
+export async function loadAddressChain(
+  code: string | null,
+): Promise<AddressChain> {
+  const provinces = await listProvinces();
 
-  const { data, error } = await supabase
-    .from("villages")
-    .select(
-      `name_kh,
-       communes!inner(
-         name_kh,
-         districts!inner(
-           name_kh,
-           provinces!inner(name_kh)
-         )
-       )`,
-    )
-    .eq("id", villageId)
-    .maybeSingle();
+  if (!code || code.length < 2) {
+    return { provinces, districts: [], communes: [], villages: [] };
+  }
 
-  if (error || !data) return null;
+  const province = provinces.find((p) => p.code === code.slice(0, 2));
+  if (!province) {
+    return { provinces, districts: [], communes: [], villages: [] };
+  }
 
-  // Supabase returns nested shape; extract safely
-  const v = data as unknown as {
-    name_kh: string;
-    communes: {
-      name_kh: string;
-      districts: {
-        name_kh: string;
-        provinces: { name_kh: string };
-      };
-    };
-  };
+  const districts = await listDistricts(province.id);
 
-  return {
-    village_name_kh: v.name_kh,
-    commune_name_kh: v.communes.name_kh,
-    district_name_kh: v.communes.districts.name_kh,
-    province_name_kh: v.communes.districts.provinces.name_kh,
-  };
+  if (code.length < 4) {
+    return { provinces, districts, communes: [], villages: [] };
+  }
+
+  const district = districts.find((d) => d.code === code.slice(0, 4));
+  if (!district) {
+    return { provinces, districts, communes: [], villages: [] };
+  }
+
+  const communes = await listCommunes(district.id);
+
+  if (code.length < 6) {
+    return { provinces, districts, communes, villages: [] };
+  }
+
+  const commune = communes.find((c) => c.code === code.slice(0, 6));
+  if (!commune) {
+    return { provinces, districts, communes, villages: [] };
+  }
+
+  const villages = await listVillages(commune.id);
+  return { provinces, districts, communes, villages };
 }

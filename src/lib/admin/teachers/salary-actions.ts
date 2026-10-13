@@ -63,7 +63,7 @@ export async function addPromotionAction(
       return {
         ok: false,
         error:
-          "កាលបរិច្ឆេទចាប់ផ្ដើមត្រូវតែក្រោយកាលបរិច្ឆេទនៃមុខតំណែងបច្ចុប្បន្ន។",
+          "កាលបរិច្ឆេទចាប់ផ្ដើមត្រូវតែក្រោយកាលបរិច្ឆេទនៃកាំប្រាក់បច្ចុប្បន្ន។",
       };
     }
     return { ok: false, error: error.message };
@@ -102,7 +102,7 @@ export async function deleteSalaryHistoryAction(
     if (error.message.includes("current position")) {
       return {
         ok: false,
-        error: "អាចលុបបានតែមុខតំណែងបច្ចុប្បន្នប៉ុណ្ណោះ។",
+        error: "អាចលុបបានតែកាំប្រាក់បច្ចុប្បន្នប៉ុណ្ណោះ។",
       };
     }
     return { ok: false, error: error.message };

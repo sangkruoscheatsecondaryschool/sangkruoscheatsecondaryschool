@@ -23,7 +23,7 @@ const items = [
   },
   {
     href: "/admin/teacher-assignments",
-    title: "ការចាត់តាំងគ្រូ",
+    title: "ការចាត់តាំងគ្រូតាមថ្នាក់ និងមុខវិជ្ជា",
     desc: "គ្រូ · ថ្នាក់ · មុខវិជ្ជា",
   },
   {
@@ -35,6 +35,16 @@ const items = [
     href: "/admin/subjects",
     title: "មុខវិជ្ជា",
     desc: "មុខវិជ្ជា និងពិន្ទុពេញតាមកម្រិតថ្នាក់",
+  },
+  {
+    href: "/admin/timetable",
+    title: "តារាងកាលវិភាគ",
+    desc: "កាលវិភាគបង្រៀនតាមថ្នាក់",
+  },
+  {
+    href: "/admin/reports",
+    title: "របាយការណ៍",
+    desc: "ចំណាត់ថ្នាក់ · តារាងកាលវិភាគ · ស្ថិតិ",
   },
 ] as const;
 

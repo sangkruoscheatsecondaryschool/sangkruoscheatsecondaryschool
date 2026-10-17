@@ -128,3 +128,84 @@
     min-width: 44px;
   }
 }
+
+/* =========================================================
+   Print layout for reports
+   ========================================================= */
+@media print {
+  /* Default A4 page */
+  @page {
+    size: A4 portrait;
+    margin: 15mm 15mm; /* Standard official document margins */
+  }
+
+  /* Specific layout for Attendance (Landscape) */
+  @page landscape-page {
+    size: A4 landscape;
+    margin: 10mm 15mm; /* Slightly smaller top/bottom to fit the wide table */
+  }
+
+  /* Hide app chrome */
+  header.app-header,
+  nav,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 11px;
+  }
+
+  /* 🔴 FIX: Remove the max-w-3xl restriction so the table spans the full page width */
+  main > div {
+    max-width: none !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Clean up cards for print (remove borders and padding, let the page handle margins) */
+  .rounded-card,
+  .rounded-btn {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    border: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  section,
+  table,
+  .report-block {
+    break-inside: avoid;
+  }
+
+  /* Page break helper */
+  .print-page-break {
+    break-after: page;
+  }
+
+  /* Specific layout for Master Timetable */
+  @page a3-landscape {
+    size: A3 landscape;
+    margin: 10mm;
+  }
+}
+
+/* Assign the landscape layout to the attendance report */
+.attendance-report {
+  page: landscape-page;
+}
+
+/* Assign the named page */
+.master-timetable-report {
+  page: a3-landscape;
+}
+
+/* Force the table to expand fully on print */
+.master-timetable-report table {
+  width: 100% !important;
+  table-layout: fixed;
+}

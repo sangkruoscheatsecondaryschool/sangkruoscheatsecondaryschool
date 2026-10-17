@@ -392,6 +392,90 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["teacher_salary_history"]["Insert"]>;
         Relationships: [];
       };
+      periods: {
+        Row: {
+          id: string;
+          academic_year_id: string;
+          period_number: number;
+          start_time: string;
+          end_time: string;
+          label: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          academic_year_id: string;
+          period_number: number;
+          start_time: string;
+          end_time: string;
+          label?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["periods"]["Insert"]>;
+        Relationships: [];
+      };
+      timetable_entries: {
+        Row: {
+          id: string;
+          academic_year_id: string;
+          class_id: string;
+          day_of_week: number;
+          period_id: string;
+          subject_id: string;
+          teacher_id: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          academic_year_id: string;
+          class_id: string;
+          day_of_week: number;
+          period_id: string;
+          subject_id: string;
+          teacher_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["timetable_entries"]["Insert"]>;
+        Relationships: [];
+      };
+      school_settings: {
+        Row: {
+          id: string;
+          school_name_kh: string;
+          school_name_en: string | null;
+          school_code: string | null;
+          ministry_line_kh: string;
+          department_line_kh: string | null;
+          district_line_kh: string | null;
+          address_code: string | null;
+          phone: string | null;
+          email: string | null;
+          principal_name_kh: string | null;
+          motto_kh: string;
+          logo_url: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          school_name_kh: string;
+          school_name_en?: string | null;
+          school_code?: string | null;
+          ministry_line_kh?: string;
+          department_line_kh?: string | null;
+          district_line_kh?: string | null;
+          address_code?: string | null;
+          phone?: string | null;
+          email?: string | null;
+          principal_name_kh?: string | null;
+          motto_kh?: string;
+          logo_url?: string | null;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["school_settings"]["Insert"]
+        >;
+        Relationships: [];
+      };
     };
     Views: {
       v_student_scores: {
@@ -651,6 +735,70 @@ export interface Database {
       delete_current_salary_position: {
         Args: { p_history_id: string };
         Returns: undefined;
+      };
+      save_timetable_entry: {
+        Args: {
+          p_class_id: string;
+          p_day_of_week: number;
+          p_period_id: string;
+          p_subject_id: string | null;
+        };
+        Returns: string | null;
+      };
+      setup_default_periods: {
+        Args: { p_academic_year_id: string };
+        Returns: undefined;
+      };
+      bulk_upsert_scores: {
+        Args: {
+          p_class_id: string;
+          p_subject_id: string;
+          p_term_month_id: string;
+          p_scores: unknown;
+        };
+        Returns: {
+          row_index: number;
+          ok: boolean;
+          student_id: string | null;
+          error: string | null;
+        }[];
+      };
+      bulk_upsert_attendance: {
+        Args: {
+          p_class_id: string;
+          p_date: string;
+          p_records: unknown;
+        };
+        Returns: {
+          row_index: number;
+          ok: boolean;
+          student_id: string | null;
+          error: string | null;
+        }[];
+      };
+      get_class_ranking_monthly: {
+        Args: { p_class_id: string; p_term_month_id: string };
+        Returns: unknown;
+      };
+      get_class_ranking_semester: {
+        Args: { p_class_id: string; p_academic_term_id: string };
+        Returns: unknown;
+      };
+      get_class_ranking_annual: {
+        Args: {
+          p_class_id: string;
+          p_academic_year_id: string;
+          p_layout?: string;
+        };
+        Returns: unknown;
+      };
+      get_class_attendance_monthly: {
+        Args: { p_class_id: string; p_month: string };
+        Returns: unknown;
+      };
+      get_school_statistics: {
+        Args: { p_academic_year_id: string };
+        Returns: unknown;
       };
     };
     Enums: {

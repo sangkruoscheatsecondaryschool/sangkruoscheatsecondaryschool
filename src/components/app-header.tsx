@@ -9,7 +9,7 @@ type AppHeaderProps = {
 
 export function AppHeader({ title, backHref, right }: AppHeaderProps) {
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-surface/95 pt-safe backdrop-blur">
+    <header className="app-header sticky top-0 z-30 border-b border-border bg-surface/95 pt-safe backdrop-blur">
       <div className="mx-auto flex min-h-16 max-w-3xl items-center gap-1 px-2 py-2">
         {backHref ? (
           <Link

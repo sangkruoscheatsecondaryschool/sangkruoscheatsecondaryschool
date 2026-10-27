@@ -101,7 +101,7 @@ export function StatisticsDashboard({ data }: { data: StatisticsData }) {
 
         {/* ===== Grade Distribution ===== */}
         <div className="rounded-card border border-border bg-surface p-4 print:border-none print:p-0">
-          <h3 className="font-moul text-sm mb-4 text-center">ការចែកចាយនិទ្ទេស (ប្រចាំឆ្នាំ)</h3>
+          <h3 className="font-moul text-sm mb-4 text-center">របាយនិទ្ទេស (ប្រចាំឆ្នាំ)</h3>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={letterGradesData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>

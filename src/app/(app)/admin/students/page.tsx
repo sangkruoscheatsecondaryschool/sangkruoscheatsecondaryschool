@@ -67,7 +67,7 @@ export default async function StudentsPage({
 
   return (
     <AppShell title="សិស្ស" backHref="/admin">
-      <YearSwitcher years={years} activeYearId={activeYear?.id ?? null} />
+      <YearSwitcher years={years} activeYearId={activeYear?.id ?? null} basePath="/admin/students" />
 
       {activeYear && classes.length > 0 ? (
         <StudentFilters

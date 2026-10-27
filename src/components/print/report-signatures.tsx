@@ -17,9 +17,9 @@ export function ReportSignatures({
   return (
     <footer className="mt-8 print:mt-6">
       <div className="grid grid-cols-2 gap-4 text-xs">
-        <div className="text-center">
+        <div className="text-center"><br /><br /><br />
           <p className="font-moul">នាយកសាលា</p>
-          <div className="h-16" />
+          <div className="h-14" />
           <p className="font-moul">{principalName ?? "________________"}</p>
         </div>
 

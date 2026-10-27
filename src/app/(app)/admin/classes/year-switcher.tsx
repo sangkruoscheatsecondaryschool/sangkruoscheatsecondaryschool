@@ -4,9 +4,11 @@ import type { AcademicYear } from "@/lib/admin/academic-years/queries";
 export function YearSwitcher({
   years,
   activeYearId,
+  basePath,
 }: {
   years: AcademicYear[];
   activeYearId: string | null;
+  basePath: string;
 }) {
   if (years.length === 0) return null;
 
@@ -17,7 +19,7 @@ export function YearSwitcher({
         return (
           <Link
             key={y.id}
-            href={`/admin/classes?year=${y.id}`}
+            href={`${basePath}?year=${y.id}`}
             className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
               active
                 ? "border-brand-600 bg-brand-600 text-white"

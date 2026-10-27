@@ -94,7 +94,7 @@ export default async function TeacherAssignmentsPage({
 
   return (
     <AppShell title="ការចាត់តាំងគ្រូ" backHref="/admin">
-      <YearSwitcher years={years} activeYearId={activeYear.id} />
+      <YearSwitcher years={years} activeYearId={activeYear.id} basePath="/admin/teacher-assignments" />
 
       {teachers.length === 0 ? (
         <div className="rounded-card border border-dashed border-border bg-surface p-6 text-center">

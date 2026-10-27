@@ -26,7 +26,7 @@ export function SchoolReportHeader({
               alt="Emblem"
               width={56}
               height={56}
-              className="h-18 w-18 object-contain ml-6"
+              className="h-18 w-18 object-contain ml-6 mb-1"
               unoptimized
             />
           ) : null}

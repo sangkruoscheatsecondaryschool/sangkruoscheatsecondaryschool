@@ -36,7 +36,7 @@ export function MasterTimetableView({
         <thead>
           <tr className="bg-blue-100">
             <th className="border border-blue-300 px-1 py-1 w-6">ល.រ</th>
-            <th className="border border-blue-300 px-1 py-1 min-w-[80px]">ឈ្មោះគ្រូ</th>
+            <th className="border border-blue-300 px-1 py-1 min-w-20">ឈ្មោះគ្រូ</th>
             <th className="border border-blue-300 px-1 py-1 w-8">ភេទ</th>
             
             {/* Days */}

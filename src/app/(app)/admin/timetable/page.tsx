@@ -62,7 +62,7 @@ export default async function TimetablePage({
 
   return (
     <AppShell title="តារាងកាលវិភាគ" backHref="/admin">
-      <YearSwitcher years={years} activeYearId={activeYear.id} />
+      <YearSwitcher years={years} activeYearId={activeYear.id} basePath="/admin/timetable" />
 
       <div className="mb-4 flex gap-2">
         <Link

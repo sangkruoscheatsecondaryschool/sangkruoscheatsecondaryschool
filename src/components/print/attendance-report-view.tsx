@@ -44,7 +44,7 @@ export function AttendanceReportView({
             <tr className="bg-blue-100">
                 <th className="border border-blue-300 px-1 py-1 w-8">ល.រ</th>
                 <th className="border border-blue-300 px-1 py-1 w-12">អត្តលេខ</th>
-                <th className="border border-blue-300 px-1 py-1 text-left min-w-[100px]">ឈ្មោះ</th>
+                <th className="border border-blue-300 px-1 py-1 text-left min-w-25">ឈ្មោះ</th>
                 <th className="border border-blue-300 px-1 py-1 w-8">ភេទ</th>
                 
                 {/* Days of month */}

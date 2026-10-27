@@ -43,14 +43,14 @@ export default async function PeriodsPage({
 
   return (
     <AppShell title="កំណត់ម៉ោងបង្រៀន" backHref="/admin">
-      <YearSwitcher years={years} activeYearId={activeYear.id} />
+      <YearSwitcher years={years} activeYearId={activeYear.id} basePath="/admin/timetable/periods" />
 
       <div className="mb-4 flex gap-2">
         <Link
           href={`/admin/timetable?year=${activeYear.id}`}
           className="touch-target rounded-btn border-border bg-surface flex flex-1 items-center justify-center border px-4 text-sm active:bg-slate-50"
         >
-          ← ត្រឡប់ទៅតារាងម៉ោង
+          ← ត្រឡប់ទៅតារាងកាលវិភាគ
         </Link>
       </div>
 

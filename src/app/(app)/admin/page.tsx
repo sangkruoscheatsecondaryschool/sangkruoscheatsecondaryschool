@@ -46,6 +46,16 @@ const items = [
     title: "របាយការណ៍",
     desc: "ចំណាត់ថ្នាក់ · តារាងកាលវិភាគ · ស្ថិតិ",
   },
+  {
+    href: "/admin/settings/school",
+    title: "ការកំណត់សាលា",
+    desc: "ឈ្មោះ លេខកូដ និងព័ត៌មានសាលា",
+  },
+  {
+    href: "/admin/settings/backup",
+    title: "បម្រុងទុកទិន្នន័យ",
+    desc: "Google Sheets",
+  },
 ] as const;
 
 export default function AdminHomePage() {

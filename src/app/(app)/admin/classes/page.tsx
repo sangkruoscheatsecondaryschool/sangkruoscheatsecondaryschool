@@ -43,7 +43,7 @@ export default async function ClassesPage({
 
   return (
     <AppShell title="ថ្នាក់រៀន" backHref="/admin">
-      <YearSwitcher years={years} activeYearId={activeYear?.id ?? null} />
+      <YearSwitcher years={years} activeYearId={activeYear?.id ?? null} basePath="/admin/classes" />
 
       {activeYear ? (
         <Link

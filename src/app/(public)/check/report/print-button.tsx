@@ -1,13 +1,18 @@
 "use client";
 
+import { Printer } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
 export function PrintButton() {
   return (
-    <button
+    <Button
       type="button"
       onClick={() => window.print()}
-      className="touch-target rounded-btn border-border bg-surface flex w-full items-center justify-center gap-2 border px-4 py-3 text-sm font-medium active:bg-slate-50"
+      size="lg"
+      className="w-full gap-2 shadow-lg"
     >
-      🖨️ បោះពុម្ព / រក្សាទុកជា PDF
-    </button>
+      <Printer className="h-5 w-5" />
+      បោះពុម្ព / ទាញយក PDF
+    </Button>
   );
 }

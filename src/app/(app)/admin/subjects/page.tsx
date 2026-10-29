@@ -1,42 +1,51 @@
 import Link from "next/link";
 import { connection } from "next/server";
-import { AppShell } from "@/components/app-shell";
+import { Plus } from "lucide-react";
 import { listSubjectsWithConfigs } from "@/lib/admin/subjects/queries";
 import { SubjectCard } from "./subject-card";
+import { PageHeader } from "@/components/layout/page-header";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const instant = false;
-
 export const metadata = { title: "មុខវិជ្ជា" };
 
 export default async function SubjectsPage() {
   await connection();
-
   const subjects = await listSubjectsWithConfigs();
 
   return (
-    <AppShell title="មុខវិជ្ជា" backHref="/admin">
-      <Link
-        href="/admin/subjects/new"
-        className="touch-target rounded-btn bg-brand-600 mb-4 flex w-full items-center justify-center px-4 font-medium text-white active:bg-brand-700"
-      >
-        + បន្ថែមមុខវិជ្ជាថ្មី
-      </Link>
+    <div className="space-y-6 animate-in fade-in duration-300">
+      <PageHeader 
+        title="គ្រប់គ្រងមុខវិជ្ជា" 
+        description="កំណត់មុខវិជ្ជា និងពិន្ទុពេញសម្រាប់ថ្នាក់ទី ៧, ៨, ៩"
+        action={
+          <Link href="/admin/subjects/new">
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              បន្ថែមមុខវិជ្ជាថ្មី
+            </Button>
+          </Link>
+        }
+      />
 
       {subjects.length === 0 ? (
-        <div className="rounded-card border border-dashed border-border bg-surface p-6 text-center">
-          <p className="text-muted text-sm">
-            មិនមានមុខវិជ្ជានៅឡើយទេ។
-          </p>
-        </div>
+        <EmptyState 
+          title="មិនទាន់មានមុខវិជ្ជា" 
+          description="សូមបង្កើតមុខវិជ្ជាដំបូងរបស់អ្នក ដើម្បីចាប់ផ្តើមបញ្ចូលពិន្ទុ។"
+          action={
+            <Link href="/admin/subjects/new">
+              <Button variant="outline">បង្កើតមុខវិជ្ជាដំបូង</Button>
+            </Link>
+          }
+        />
       ) : (
-        <ul className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {subjects.map((s) => (
-            <li key={s.id}>
-              <SubjectCard subject={s} />
-            </li>
+            <SubjectCard key={s.id} subject={s} />
           ))}
-        </ul>
+        </div>
       )}
-    </AppShell>
+    </div>
   );
 }

@@ -147,7 +147,7 @@ export function CascadingAddressPicker({
           onChange={(e) => onProvinceChange(e.target.value)}
           disabled={disabled}
           required={required}
-          className="rounded-btn border-border bg-surface w-full border px-3 py-2.5 text-sm disabled:opacity-60"
+          className="flex h-12 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <option value="">— ជ្រើសរើសខេត្ត/ក្រុង —</option>
           {provinces.map((p) => (
@@ -166,7 +166,7 @@ export function CascadingAddressPicker({
           value={districtId}
           onChange={(e) => onDistrictChange(e.target.value)}
           disabled={disabled || !provinceId || districts.length === 0}
-          className="rounded-btn border-border bg-surface w-full border px-3 py-2.5 text-sm disabled:opacity-60"
+          className="flex h-12 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <option value="">
             {provinceId && districts.length === 0
@@ -189,7 +189,7 @@ export function CascadingAddressPicker({
           value={communeId}
           onChange={(e) => onCommuneChange(e.target.value)}
           disabled={disabled || !districtId || communes.length === 0}
-          className="rounded-btn border-border bg-surface w-full border px-3 py-2.5 text-sm disabled:opacity-60"
+          className="flex h-12 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <option value="">
             {districtId && communes.length === 0
@@ -212,7 +212,7 @@ export function CascadingAddressPicker({
           value={villageId}
           onChange={(e) => setVillageId(e.target.value)}
           disabled={disabled || !communeId || villages.length === 0}
-          className="rounded-btn border-border bg-surface w-full border px-3 py-2.5 text-sm disabled:opacity-60"
+          className="flex h-12 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <option value="">
             {communeId && villages.length === 0

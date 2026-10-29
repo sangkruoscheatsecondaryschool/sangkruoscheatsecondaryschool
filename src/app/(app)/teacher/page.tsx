@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { connection } from "next/server";
-import { AppShell } from "@/components/app-shell";
+import { School } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/get-current-user";
 import { getTeacherClassCards } from "@/lib/teacher/queries";
 import { TeacherClassCard } from "./teacher-class-card";
+import { PageHeader } from "@/components/layout/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const instant = false;
-
 export const metadata = { title: "គ្រូបង្រៀន" };
 
 export default async function TeacherHomePage() {
@@ -18,23 +19,24 @@ export default async function TeacherHomePage() {
   const classes = await getTeacherClassCards(user.id);
 
   return (
-    <AppShell title="ថ្នាក់របស់ខ្ញុំ" backHref="/dashboard">
+    <div className="space-y-6 animate-in fade-in duration-300">
+      <PageHeader 
+        title="ថ្នាក់របស់ខ្ញុំ" 
+        description="គ្រប់គ្រងថ្នាក់រៀន បញ្ចូលពិន្ទុ និងកត់ត្រាវត្តមាន"
+      />
+
       {classes.length === 0 ? (
-        <div className="rounded-card border border-dashed border-border bg-surface p-6 text-center">
-          <p className="font-moul text-sm">មិនមានថ្នាក់នៅឡើយទេ</p>
-          <p className="text-muted mt-2 text-xs">
-            អ្នកមិនទាន់ត្រូវបានចាត់តាំងជាគ្រូបន្ទុកថ្នាក់ ឬគ្រូបង្រៀនមុខវិជ្ជាណាមួយទេ។
-          </p>
-        </div>
+        <EmptyState 
+          title="មិនទាន់មានថ្នាក់រៀន" 
+          description="អ្នកមិនទាន់ត្រូវបានចាត់តាំងជាគ្រូបន្ទុកថ្នាក់ ឬគ្រូបង្រៀនមុខវិជ្ជាណាមួយទេ។ សូមទាក់ទងនាយកសាលា។"
+        />
       ) : (
-        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {classes.map((c) => (
-            <li key={c.class_id}>
-              <TeacherClassCard card={c} />
-            </li>
+            <TeacherClassCard key={c.class_id} card={c} />
           ))}
-        </ul>
+        </div>
       )}
-    </AppShell>
+    </div>
   );
 }

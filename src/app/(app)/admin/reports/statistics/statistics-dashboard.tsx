@@ -14,6 +14,7 @@ import {
   Legend,
 } from "recharts";
 import type { StatisticsData } from "@/lib/admin/reports/statistics";
+import { Card } from "@/components/ui/card";
 
 const COLORS = ["#2563eb", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#64748b"];
 const GENDER_COLORS = ["#3b82f6", "#ec4899"]; // Blue for male, Pink for female
@@ -48,33 +49,33 @@ export function StatisticsDashboard({ data }: { data: StatisticsData }) {
     <div className="space-y-6 print:space-y-4 print:text-black">
       
       {/* ===== Summary Cards ===== */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <SummaryCard title="សិស្សសរុប" value={totalStudents.toString()} />
         <SummaryCard title="គ្រូបង្រៀនសរុប" value={data.teachers.total.toString()} />
         <SummaryCard title="អត្រាជាប់" value={`${passRate}%`} tone="green" />
         <SummaryCard title="អត្រាវត្តមាន" value={`${presentRate}%`} tone="blue" />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 print:grid-cols-2 print:gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print:grid-cols-2 print:gap-4">
         {/* ===== Student by Grade ===== */}
-        <div className="rounded-card border border-border bg-surface p-4 print:border-none print:p-0">
-          <h3 className="font-moul text-sm mb-4 text-center">ចំនួនសិស្សតាមកម្រិតថ្នាក់</h3>
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm print:border-none print:shadow-none print:p-0">
+          <h3 className="font-moul text-sm mb-6 text-center text-slate-800">ចំនួនសិស្សតាមកម្រិតថ្នាក់</h3>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={gradeData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
-                <Tooltip />
-                <Bar dataKey="total" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Bar dataKey="total" fill="#2563eb" radius={[4, 4, 0, 0]} maxBarSize={50} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* ===== Gender Pie Chart ===== */}
-        <div className="rounded-card border border-border bg-surface p-4 print:border-none print:p-0">
-          <h3 className="font-moul text-sm mb-4 text-center">សមាមាត្រភេទសិស្ស</h3>
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm print:border-none print:shadow-none print:p-0">
+          <h3 className="font-moul text-sm mb-6 text-center text-slate-800">សមាមាត្រភេទសិស្ស</h3>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -92,24 +93,24 @@ export function StatisticsDashboard({ data }: { data: StatisticsData }) {
                     <Cell key={`cell-${index}`} fill={GENDER_COLORS[index % GENDER_COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
-                <Legend verticalAlign="bottom" height={36} />
+                <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Legend verticalAlign="bottom" height={36} iconType="circle" />
               </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* ===== Grade Distribution ===== */}
-        <div className="rounded-card border border-border bg-surface p-4 print:border-none print:p-0">
-          <h3 className="font-moul text-sm mb-4 text-center">របាយនិទ្ទេស (ប្រចាំឆ្នាំ)</h3>
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm print:border-none print:shadow-none print:p-0">
+          <h3 className="font-moul text-sm mb-6 text-center text-slate-800">ការចែកចាយនិទ្ទេស (ប្រចាំឆ្នាំ)</h3>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={letterGradesData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
-                <Tooltip />
-                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Bar dataKey="count" radius={[4, 4, 0, 0]} maxBarSize={50}>
                   {letterGradesData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
@@ -120,8 +121,8 @@ export function StatisticsDashboard({ data }: { data: StatisticsData }) {
         </div>
 
         {/* ===== Teacher Gender ===== */}
-        <div className="rounded-card border border-border bg-surface p-4 print:border-none print:p-0">
-          <h3 className="font-moul text-sm mb-4 text-center">សមាមាត្រភេទគ្រូបង្រៀន</h3>
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm print:border-none print:shadow-none print:p-0">
+          <h3 className="font-moul text-sm mb-6 text-center text-slate-800">សមាមាត្រភេទគ្រូបង្រៀន</h3>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -142,8 +143,8 @@ export function StatisticsDashboard({ data }: { data: StatisticsData }) {
                     <Cell key={`cell-${index}`} fill={GENDER_COLORS[index % GENDER_COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
-                <Legend verticalAlign="bottom" height={36} />
+                <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Legend verticalAlign="bottom" height={36} iconType="circle" />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -167,12 +168,12 @@ function SummaryCard({
       ? "border-green-200 bg-green-50 text-green-800"
       : tone === "blue"
         ? "border-blue-200 bg-blue-50 text-blue-800"
-        : "border-border bg-surface";
+        : "border-slate-200 bg-slate-50";
 
   return (
-    <div className={`rounded-card border ${cls} p-4 text-center print:border-gray-300`}>
-      <p className="text-[11px] uppercase tracking-wide opacity-80">{title}</p>
-      <p className="mt-1 text-2xl font-bold tabular-nums">{value}</p>
-    </div>
+    <Card className={`rounded-2xl border ${cls} p-4 text-center print:border-slate-300 print:bg-transparent shadow-sm`}>
+      <p className="text-[11px] font-medium uppercase tracking-wide opacity-80">{title}</p>
+      <p className="mt-1 text-2xl font-inter font-bold tabular-nums">{value}</p>
+    </Card>
   );
 }

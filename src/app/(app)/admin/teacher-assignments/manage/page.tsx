@@ -1,67 +1,52 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
-import { AppShell } from "@/components/app-shell";
+import { ArrowLeft } from "lucide-react";
 import { getAcademicYear } from "@/lib/admin/academic-years/queries";
-import {
-  listClassOptions,
-  listSubjectOptions,
-  listTeacherOptions,
-  listAssignmentsForYear,
-  listTakenSubjectsByClass,
-} from "@/lib/admin/teacher-assignments/queries";
+import { listClassOptions, listSubjectOptions, listTeacherOptions, listAssignmentsForYear, listTakenSubjectsByClass } from "@/lib/admin/teacher-assignments/queries";
 import { TeacherSelector } from "./teacher-selector";
 import { ManageForm } from "./manage-form";
+import { PageHeader } from "@/components/layout/page-header";
 
 export const instant = false;
-
 export const metadata = { title: "ការចាត់តាំងគ្រូ" };
 
-export default async function ManageAssignmentsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ year?: string; teacher?: string }>;
-}) {
+export default async function ManageAssignmentsPage({ searchParams }: { searchParams: Promise<{ year?: string; teacher?: string }> }) {
   await connection();
-
   const sp = await searchParams;
   if (!sp.year) notFound();
 
   const [year, teachers, classes, subjects] = await Promise.all([
-    getAcademicYear(sp.year),
-    listTeacherOptions(),
-    listClassOptions(sp.year),
-    listSubjectOptions(),
+    getAcademicYear(sp.year), listTeacherOptions(), listClassOptions(sp.year), listSubjectOptions(),
   ]);
-
   if (!year) notFound();
 
-  const validTeacherId =
-    sp.teacher && teachers.some((t) => t.id === sp.teacher)
-      ? sp.teacher
-      : undefined;
+  const validTeacherId = sp.teacher && teachers.some((t) => t.id === sp.teacher) ? sp.teacher : undefined;
 
-  if (!validTeacherId) {
-    return (
-      <AppShell
-        title="ការចាត់តាំងគ្រូ"
-        backHref={`/admin/teacher-assignments?year=${year.id}`}
-      >
-        <TeacherSelector
-          yearId={year.id}
-          teachers={teachers}
-          yearName={year.year_name}
-        />
-      </AppShell>
-    );
-  }
+  return (
+    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-300">
+      <Link href={`/admin/teacher-assignments?year=${year.id}`} className="inline-flex items-center text-sm text-slate-500 hover:text-primary-600 mb-2">
+        <ArrowLeft className="h-4 w-4 mr-1" /> ត្រឡប់ក្រោយ
+      </Link>
 
-  const currentTeacher = teachers.find((t) => t.id === validTeacherId)!;
+      {!validTeacherId ? (
+        <>
+          <PageHeader title="ចាត់តាំងគ្រូ" description="ជ្រើសរើសគ្រូដែលអ្នកចង់ចាត់តាំងមុខវិជ្ជា" />
+          <TeacherSelector yearId={year.id} teachers={teachers} yearName={year.year_name} />
+        </>
+      ) : (
+        <ManageAssignmentsLoader yearId={year.id} teacherId={validTeacherId} classes={classes} subjects={subjects} teachers={teachers} />
+      )}
+    </div>
+  );
+}
 
-  // Load existing assignments for this teacher
+// Helper to fetch data just for the selected teacher
+async function ManageAssignmentsLoader({ yearId, teacherId, classes, subjects, teachers }: any) {
+  const currentTeacher = teachers.find((t: any) => t.id === teacherId);
   const [assignments, takenByClass] = await Promise.all([
-    listAssignmentsForYear(year.id, { teacherId: validTeacherId }),
-    listTakenSubjectsByClass(year.id, validTeacherId),
+    listAssignmentsForYear(yearId, { teacherId }),
+    listTakenSubjectsByClass(yearId, teacherId),
   ]);
 
   const initialByClass: Record<string, string[]> = {};
@@ -71,41 +56,9 @@ export default async function ManageAssignmentsPage({
   }
 
   return (
-    <AppShell
-      title={`ការចាត់តាំង · ${currentTeacher.full_name_kh}`}
-      backHref={`/admin/teacher-assignments?year=${year.id}&teacher=${validTeacherId}`}
-    >
-      <div className="space-y-4">
-        <div className="rounded-card border-border bg-surface border p-3">
-          <p className="text-muted text-xs">គ្រូបង្រៀន</p>
-          <p className="font-moul mt-0.5 text-sm">
-            {currentTeacher.full_name_kh}
-          </p>
-          <Link
-            href={`/admin/teacher-assignments/manage?year=${year.id}`}
-            className="text-brand-700 mt-2 inline-block text-xs underline-offset-4 hover:underline"
-          >
-            ផ្លាស់ប្ដូរគ្រូ
-          </Link>
-        </div>
-
-        {classes.length === 0 ? (
-          <div className="rounded-card border border-dashed border-border bg-surface p-6 text-center">
-            <p className="text-muted text-sm">
-              មិនមានថ្នាក់រៀននៅក្នុងឆ្នាំនេះទេ។
-            </p>
-          </div>
-        ) : (
-          <ManageForm
-            yearId={year.id}
-            teacherId={validTeacherId}
-            classes={classes}
-            subjects={subjects}
-            initialByClass={initialByClass}
-            takenByClass={takenByClass}
-          />
-        )}
-      </div>
-    </AppShell>
+    <>
+      <PageHeader title={`ចាត់តាំងគ្រូ · ${currentTeacher.full_name_kh}`} description="ធីកជ្រើសរើសមុខវិជ្ជាដែលគ្រូនេះបង្រៀន" />
+      <ManageForm yearId={yearId} teacherId={teacherId} classes={classes} subjects={subjects} initialByClass={initialByClass} takenByClass={takenByClass} />
+    </>
   );
 }

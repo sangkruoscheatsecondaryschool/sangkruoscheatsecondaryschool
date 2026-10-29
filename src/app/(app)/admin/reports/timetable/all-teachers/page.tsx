@@ -1,16 +1,18 @@
+import Link from "next/link";
 import { connection } from "next/server";
-import { AppShell } from "@/components/app-shell";
+import { ArrowLeft } from "lucide-react";
 import { getSchoolSettings } from "@/lib/admin/school/queries";
 import { fetchAllTeachersTimetable } from "@/lib/admin/reports/timetable";
 import { MasterTimetableView } from "@/components/print/master-timetable-view";
 import { PrintButton } from "@/components/print/print-button";
+import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const instant = false;
 export const metadata = { title: "តារាងកាលវិភាគគ្រូទាំងអស់" };
 
 export default async function AllTeachersTimetablePage() {
   await connection();
-
   const [data, settings] = await Promise.all([
     fetchAllTeachersTimetable(),
     getSchoolSettings(),
@@ -18,20 +20,26 @@ export default async function AllTeachersTimetablePage() {
 
   if (!data || !settings) {
     return (
-      <AppShell title="តារាងកាលវិភាគគ្រូទាំងអស់" backHref="/admin/reports/timetable">
-        <p className="text-muted text-sm">រកមិនឃើញទិន្នន័យ។</p>
-      </AppShell>
+      <div className="space-y-6">
+        <Link href="/admin/reports/timetable" className="inline-flex items-center text-sm text-slate-500 hover:text-primary-600 mb-2"><ArrowLeft className="h-4 w-4 mr-1" /> ត្រឡប់ក្រោយ</Link>
+        <EmptyState title="រកមិនឃើញទិន្នន័យ" description="សូមពិនិត្យមូលដ្ឋានទិន្នន័យឡើងវិញ។" />
+      </div>
     );
   }
 
   return (
-    <AppShell title="តារាងកាលវិភាគគ្រូទាំងអស់" backHref="/admin/reports/timetable">
-      <div className="rounded-card border-border bg-white border p-4 print:border-0 print:p-0 print:bg-transparent">
+    <div className="space-y-6 animate-in fade-in duration-300">
+      <Link href="/admin/reports/timetable" className="inline-flex items-center text-sm text-slate-500 hover:text-primary-600 mb-2 print:hidden">
+        <ArrowLeft className="h-4 w-4 mr-1" /> ត្រឡប់ក្រោយ
+      </Link>
+      
+      <Card className="p-4 md:p-8 print:p-0 print:border-none print:shadow-none overflow-hidden">
         <MasterTimetableView data={data} settings={settings} />
-      </div>
-      <div className="mt-4 print:hidden">
+      </Card>
+      
+      <div className="print:hidden">
         <PrintButton />
       </div>
-    </AppShell>
+    </div>
   );
 }

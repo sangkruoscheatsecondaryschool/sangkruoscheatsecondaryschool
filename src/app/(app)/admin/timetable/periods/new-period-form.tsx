@@ -2,95 +2,63 @@
 
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Plus } from "lucide-react";
 import type { ActionResult } from "@/lib/actions/types";
 import { createPeriodAction } from "@/lib/admin/timetable/actions";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
-export function NewPeriodForm({
-  yearId,
-  nextNumber,
-}: {
-  yearId: string;
-  nextNumber: number;
-}) {
+export function NewPeriodForm({ yearId, nextNumber }: { yearId: string; nextNumber: number }) {
   const router = useRouter();
-  const [state, action, pending] = useActionState<
-    ActionResult | null,
-    FormData
-  >(createPeriodAction, null);
+  const [state, action, pending] = useActionState<ActionResult | null, FormData>(createPeriodAction, null);
 
   useEffect(() => {
     if (state?.ok) router.refresh();
   }, [state, router]);
 
   return (
-    <form
-      action={action}
-      className="rounded-card border-border bg-surface space-y-3 border p-3"
-    >
+    <form action={action} className="space-y-4">
       <input type="hidden" name="year_id" value={yearId} />
+      <h3 className="font-moul text-lg text-slate-800">បន្ថែមម៉ោងថ្មី</h3>
 
-      <p className="font-moul text-sm">បន្ថែមម៉ោងថ្មី</p>
-
-      <div className="grid grid-cols-3 gap-2">
-        <div>
-          <label className="text-muted mb-1 block text-[10px] uppercase">
-            លេខម៉ោង
-          </label>
-          <input
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-slate-700">លេខម៉ោង</label>
+          <Input
             name="period_number"
             type="number"
             min="1"
             max="20"
             defaultValue={nextNumber}
             required
-            className="rounded-btn border-border bg-surface w-full border px-2 py-1.5 text-sm tabular-nums"
+            className="font-inter text-center"
           />
         </div>
-        <div>
-          <label className="text-muted mb-1 block text-[10px] uppercase">
-            ចាប់ផ្ដើម
-          </label>
-          <input
-            name="start_time"
-            type="time"
-            required
-            className="rounded-btn border-border bg-surface w-full border px-2 py-1.5 text-sm"
-          />
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-slate-700">ម៉ោងចាប់ផ្ដើម</label>
+          <Input name="start_time" type="time" required className="font-inter" />
         </div>
-        <div>
-          <label className="text-muted mb-1 block text-[10px] uppercase">
-            បញ្ចប់
-          </label>
-          <input
-            name="end_time"
-            type="time"
-            required
-            className="rounded-btn border-border bg-surface w-full border px-2 py-1.5 text-sm"
-          />
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-slate-700">ម៉ោងបញ្ចប់</label>
+          <Input name="end_time" type="time" required className="font-inter" />
         </div>
       </div>
 
-      <input
-        name="label"
-        type="text"
-        maxLength={50}
-        placeholder="ឈ្មោះម៉ោង (ស្រេចចិត្ត)"
-        className="rounded-btn border-border bg-surface w-full border px-3 py-2 text-sm"
-      />
+      <div className="space-y-1.5">
+        <label className="text-sm font-medium text-slate-700">ឈ្មោះម៉ោង (ស្រេចចិត្ត)</label>
+        <Input name="label" type="text" maxLength={50} placeholder="ឧ. ម៉ោងភាសាខ្មែរ" />
+      </div>
 
-      {state && !state.ok ? (
-        <div className="rounded-btn border border-red-200 bg-red-50 p-2 text-xs text-red-700">
-          {state.error}
-        </div>
-      ) : null}
+      {state && !state.ok && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{state.error}</div>
+      )}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="touch-target rounded-btn bg-brand-600 w-full px-4 py-2.5 text-sm font-medium text-white active:bg-brand-700 disabled:opacity-60"
-      >
-        {pending ? "កំពុងបន្ថែម..." : "+ បន្ថែមម៉ោង"}
-      </button>
+      <div className="pt-2">
+        <Button type="submit" disabled={pending} className="w-full sm:w-auto gap-2">
+          <Plus className="h-4 w-4" />
+          {pending ? "កំពុងបន្ថែម..." : "បន្ថែមម៉ោង"}
+        </Button>
+      </div>
     </form>
   );
 }

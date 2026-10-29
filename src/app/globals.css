@@ -7,28 +7,24 @@
    a self-referential var() loop that breaks font-family resolution.
    ========================================================= */
 @theme {
-  /* Brand palette (blue) */
-  --color-brand-50:  #eff6ff;
-  --color-brand-100: #dbeafe;
-  --color-brand-200: #bfdbfe;
-  --color-brand-300: #93c5fd;
-  --color-brand-400: #60a5fa;
-  --color-brand-500: #3b82f6;
-  --color-brand-600: #2563eb;
-  --color-brand-700: #1d4ed8;
-  --color-brand-800: #1e40af;
-  --color-brand-900: #1e3a8a;
+  /* Modern Web App Palette */
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-900: #1e3a8a;
 
-  /* Semantic tokens */
+  --color-accent-500: #f59e0b; /* Warm Orange */
+  --color-success-500: #10b981;
+  --color-danger-500: #ef4444;
+
   --color-surface: #ffffff;
-  --color-bg:      #f8fafc;
-  --color-fg:      #0f172a;
-  --color-muted:   #64748b;
-  --color-border:  #e2e8f0;
+  --color-background: #f8fafc; /* Slate 50 */
+  --color-border: #e2e8f0;
 
-  /* Radii */
-  --radius-card: 0.75rem;
-  --radius-btn:  0.5rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
 }
 
 /* =========================================================
@@ -36,40 +32,20 @@
    ========================================================= */
 @layer base {
   html {
-    -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
-    text-rendering: optimizeLegibility;
   }
 
   body {
-    background: var(--color-bg);
-    color: var(--color-fg);
-    font-family:
-      var(--font-kantumruy),
-      var(--font-siemreap),
-      system-ui,
-      -apple-system,
-      "Segoe UI",
-      Roboto,
-      sans-serif;
-    line-height: 1.75;
+    background: var(--color-background);
+    color: #0f172a;
+    font-family: var(--font-kantumruy), system-ui, sans-serif;
+    line-height: 1.7;
     min-height: 100dvh;
   }
-
   h1, h2, h3, h4, h5, h6 {
-    font-family:
-      var(--font-moul),
-      var(--font-kantumruy),
-      system-ui,
-      sans-serif;
-    font-weight: 400;
-    /* Moul has tall ascenders/diacritics — needs generous line-height
-       so glyphs are never clipped by container overflow. */
-    line-height: 1.9;
-    padding-top: 0.15em;
-    padding-bottom: 0.05em;
+    font-family: var(--font-moul), var(--font-kantumruy), sans-serif;
+    line-height: 1.5;
   }
-
   input, select, textarea, button {
     font-family: inherit;
     font-size: max(16px, 1rem);
@@ -136,19 +112,25 @@
   /* Default A4 page */
   @page {
     size: A4 portrait;
-    margin: 15mm 15mm; /* Standard official document margins */
+    margin: 15mm 15mm;
   }
 
-  /* Specific layout for Attendance (Landscape) */
+  /* Specific layout for Attendance and Timetables (Landscape) */
   @page landscape-page {
     size: A4 landscape;
-    margin: 10mm 15mm; /* Slightly smaller top/bottom to fit the wide table */
+    margin: 10mm 15mm;
   }
 
-  /* Hide app chrome */
-  header.app-header,
-  nav,
-  .print\:hidden {
+  /* Specific layout for Master Timetable */
+  @page a3-landscape {
+    size: A3 landscape;
+    margin: 10mm;
+  }
+
+  /* Hide app chrome (Sidebar, Mobile Tabbar). 
+     Note: Topbar hides itself via the print:hidden Tailwind class. */
+  aside,
+  nav {
     display: none !important;
   }
 
@@ -158,21 +140,26 @@
     font-size: 11px;
   }
 
-  /* 🔴 FIX: Remove the max-w-3xl restriction so the table spans the full page width */
-  main > div {
-    max-width: none !important;
+  /* Remove sidebar padding (md:pl-64) and max-widths to span full page */
+  main,
+  .md\:pl-64,
+  .max-w-6xl,
+  .max-w-4xl,
+  .max-w-3xl {
     width: 100% !important;
-    padding: 0 !important;
+    max-width: 100% !important;
     margin: 0 !important;
+    padding: 0 !important;
   }
 
-  /* Clean up cards for print (remove borders and padding, let the page handle margins) */
+  /* Clean up cards for print */
   .rounded-card,
-  .rounded-btn {
+  .rounded-btn,
+  .bg-white,
+  .bg-slate-50 {
     box-shadow: none !important;
     border-radius: 0 !important;
     border: none !important;
-    padding: 0 !important;
     background: transparent !important;
   }
 
@@ -186,25 +173,19 @@
   .print-page-break {
     break-after: page;
   }
-
-  /* Specific layout for Master Timetable */
-  @page a3-landscape {
-    size: A3 landscape;
-    margin: 10mm;
-  }
 }
 
-/* Assign the landscape layout to the attendance report */
-.attendance-report {
+/* Assign the landscape layouts */
+.attendance-report,
+.timetable-report {
   page: landscape-page;
 }
 
-/* Assign the named page */
 .master-timetable-report {
   page: a3-landscape;
 }
 
-/* Force the table to expand fully on print */
+/* Force the master table to expand fully */
 .master-timetable-report table {
   width: 100% !important;
   table-layout: fixed;

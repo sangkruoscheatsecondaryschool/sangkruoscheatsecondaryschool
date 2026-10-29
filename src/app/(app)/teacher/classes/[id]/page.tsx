@@ -1,18 +1,16 @@
-import { forbidden, notFound } from "next/navigation";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import { connection } from "next/server";
-import { AppShell } from "@/components/app-shell";
+import { ArrowLeft, Users } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/get-current-user";
 import { getTeacherClassDetail } from "@/lib/teacher/queries";
 import { ClassActions } from "./class-actions";
 import { RosterList } from "./roster-list";
+import { Card, CardContent } from "@/components/ui/card";
 
 export const instant = false;
 
-export default async function TeacherClassPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function TeacherClassPage({ params }: { params: Promise<{ id: string }> }) {
   await connection();
 
   const user = await getCurrentUser();
@@ -21,74 +19,60 @@ export default async function TeacherClassPage({
   const { id } = await params;
   const detail = await getTeacherClassDetail(user.id, id);
 
-  if (!detail) {
-    // Not a class this teacher teaches — either it doesn't exist, or they
-    // shouldn't see it. Distinguish: if the class exists but no access, 403.
-    // For simplicity here, treat both as 404 to avoid leaking existence.
-    notFound();
-  }
+  if (!detail) notFound();
 
   return (
-    <AppShell
-      title={`ថ្នាក់ ${detail.class_name}`}
-      backHref="/teacher"
-    >
-      <div className="space-y-4">
-        {/* Header card */}
-        <div className="rounded-card border-border bg-surface border p-4">
-          <div className="flex items-start justify-between gap-2">
+    <div className="space-y-6 animate-in fade-in duration-300 pb-20">
+      <Link href="/teacher" className="inline-flex items-center text-sm text-slate-500 hover:text-primary-600 mb-2">
+        <ArrowLeft className="h-4 w-4 mr-1" /> ត្រឡប់ក្រោយ
+      </Link>
+
+      {/* Header Card */}
+      <Card className="border-none shadow-md bg-gradient-to-br from-primary-900 to-primary-700 text-white overflow-hidden relative">
+        <div className="absolute top-0 right-0 p-8 opacity-10">
+          <Users className="w-32 h-32" />
+        </div>
+        <CardContent className="p-6 relative z-10">
+          <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="font-moul text-lg">{detail.class_name}</p>
-              <p className="text-muted mt-0.5 text-xs">
-                ថ្នាក់ទី {detail.grade_level} · {detail.academic_year_name}
+              <h1 className="font-moul text-3xl">{detail.class_name}</h1>
+              <p className="text-primary-100 mt-1">
+                ថ្នាក់ទី {detail.grade_level} · ឆ្នាំសិក្សា {detail.academic_year_name}
               </p>
             </div>
-            {detail.is_homeroom ? (
-              <span className="bg-brand-100 text-brand-800 shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium">
+            {detail.is_homeroom && (
+              <span className="bg-white/20 text-white backdrop-blur-sm shrink-0 rounded-full px-3 py-1 text-xs font-semibold border border-white/30">
                 គ្រូបន្ទុក
               </span>
-            ) : null}
+            )}
           </div>
+          
+          <div className="mt-6 flex flex-wrap gap-2">
+             <div className="bg-white/10 rounded-lg px-3 py-1.5 text-sm border border-white/10 flex items-center gap-2">
+                <Users className="h-4 w-4 opacity-70" /> សិស្សសរុប {detail.students.length} នាក់
+             </div>
+             {detail.subjects_taught.length > 0 && (
+               <div className="bg-white/10 rounded-lg px-3 py-1.5 text-sm border border-white/10">
+                 បង្រៀន {detail.subjects_taught.length} មុខវិជ្ជា
+               </div>
+             )}
+          </div>
+        </CardContent>
+      </Card>
 
-          <p className="text-muted mt-3 text-xs">
-            សិស្ស {detail.students.length} នាក់
-          </p>
+      {/* Actions */}
+      <ClassActions
+        classId={detail.class_id}
+        className={detail.class_name}
+        subjects={detail.subjects_taught}
+        isHomeroom={detail.is_homeroom}
+      />
 
-          {detail.subjects_taught.length > 0 ? (
-            <div className="mt-3">
-              <p className="text-muted mb-1.5 text-[10px] font-medium uppercase">
-                មុខវិជ្ជាដែលអ្នកបង្រៀន
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {detail.subjects_taught.map((s) => (
-                  <span
-                    key={s.id}
-                    className="rounded-btn border-border bg-bg border px-2 py-0.5 text-[11px]"
-                  >
-                    {s.subject_name} · {s.code}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ) : null}
-        </div>
-
-        {/* Action cards */}
-        <ClassActions
-          classId={detail.class_id}
-          className={detail.class_name}
-          subjects={detail.subjects_taught}
-          isHomeroom={detail.is_homeroom}
-        />
-
-        {/* Roster */}
-        <section>
-          <h2 className="font-moul text-muted mb-2 text-sm">
-            បញ្ជីឈ្មោះសិស្ស
-          </h2>
-          <RosterList students={detail.students} />
-        </section>
+      {/* Roster */}
+      <div>
+        <h2 className="font-moul text-xl text-slate-800 mb-4">បញ្ជីឈ្មោះសិស្ស</h2>
+        <RosterList students={detail.students} />
       </div>
-    </AppShell>
+    </div>
   );
 }

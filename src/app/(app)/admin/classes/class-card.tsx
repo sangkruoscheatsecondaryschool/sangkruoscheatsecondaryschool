@@ -3,18 +3,17 @@
 import Link from "next/link";
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Users, UserCircle2, Edit, Trash2 } from "lucide-react";
 import type { ActionResult } from "@/lib/actions/types";
 import type { ClassRow } from "@/lib/admin/classes/queries";
 import { deleteClassAction } from "@/lib/admin/classes/actions";
 import { useVisibleError } from "@/lib/hooks/use-visible-error";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export function ClassCard({ cls }: { cls: ClassRow }) {
   const router = useRouter();
-  const [state, action, pending] = useActionState<
-    ActionResult | null,
-    FormData
-  >(deleteClassAction, null);
-
+  const [state, action, pending] = useActionState<ActionResult | null, FormData>(deleteClassAction, null);
   const visibleError = useVisibleError(state);
 
   useEffect(() => {
@@ -22,62 +21,53 @@ export function ClassCard({ cls }: { cls: ClassRow }) {
   }, [state, router]);
 
   return (
-    <div className="rounded-card border-border bg-surface border p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <Link
-            href={`/admin/classes/${cls.id}`}
-            className="block active:opacity-80"
-          >
-            <p className="font-moul truncate text-base">{cls.class_name}</p>
+    <Card className="p-4 hover:shadow-md transition-shadow group flex flex-col justify-between">
+      <div>
+        <div className="flex items-start justify-between gap-2">
+          <Link href={`/admin/classes/${cls.id}`} className="block">
+            <h3 className="font-moul text-lg group-hover:text-primary-600 transition-colors">{cls.class_name}</h3>
           </Link>
-          <p className="text-muted mt-0.5 text-xs">
-            គ្រូបន្ទុក៖ {cls.teacher_name_kh ?? "—"}
-          </p>
-          <p className="text-muted mt-0.5 text-xs">
-            សិស្ស៖ {cls.student_count}
-          </p>
+          <span className="bg-primary-50 text-primary-700 text-xs px-2.5 py-1 rounded-full font-medium">
+            ថ្នាក់ទី {cls.grade_level}
+          </span>
         </div>
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-700">
-          ថ្នាក់ទី {cls.grade_level}
-        </span>
+
+        <div className="mt-4 space-y-2 text-sm text-slate-600">
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4 text-slate-400" />
+            <span>សិស្សសរុប៖ <span className="font-medium text-slate-900">{cls.student_count}</span> នាក់</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <UserCircle2 className="h-4 w-4 text-slate-400" />
+            <span className="truncate">គ្រូបន្ទុក៖ {cls.teacher_name_kh ?? "—"}</span>
+          </div>
+        </div>
       </div>
 
-      {visibleError ? (
-        <div
-          role="alert"
-          className="rounded-btn mt-3 border border-red-200 bg-red-50 p-2 text-xs text-red-700"
-        >
-          {visibleError}
-        </div>
-      ) : null}
+      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+        {visibleError ? (
+          <p className="text-xs text-red-600 truncate">{visibleError}</p>
+        ) : <span />}
 
-      <div className="mt-3 flex flex-wrap gap-2">
-        <Link
-          href={`/admin/classes/${cls.id}`}
-          className="touch-target rounded-btn border-border bg-surface flex items-center border px-3 text-sm active:bg-slate-50"
-        >
-          កែប្រែ
-        </Link>
-
-        <form
-          action={action}
-          onSubmit={(e) => {
-            if (!window.confirm(`លុបថ្នាក់ ${cls.class_name}?`)) {
-              e.preventDefault();
-            }
-          }}
-        >
-          <input type="hidden" name="class_id" value={cls.id} />
-          <button
-            type="submit"
-            disabled={pending}
-            className="touch-target rounded-btn border border-red-200 px-3 text-sm text-red-700 active:bg-red-50 disabled:opacity-60"
+        <div className="flex gap-1">
+          <Link href={`/admin/classes/${cls.id}`}>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-slate-400 hover:text-primary-600">
+              <Edit className="h-4 w-4" />
+            </Button>
+          </Link>
+          <form
+            action={action}
+            onSubmit={(e) => {
+              if (!window.confirm(`លុបថ្នាក់ ${cls.class_name}?`)) e.preventDefault();
+            }}
           >
-            {pending ? "..." : "លុប"}
-          </button>
-        </form>
+            <input type="hidden" name="class_id" value={cls.id} />
+            <Button type="submit" variant="ghost" size="sm" disabled={pending} className="h-8 w-8 p-0 text-slate-400 hover:text-red-600">
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </form>
+        </div>
       </div>
-    </div>
+    </Card>
   );
 }

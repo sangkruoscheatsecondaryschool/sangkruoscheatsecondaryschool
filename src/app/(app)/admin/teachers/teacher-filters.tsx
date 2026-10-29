@@ -1,4 +1,7 @@
+import { Search } from "lucide-react";
 import type { SubjectOption } from "@/lib/admin/teachers/queries";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export function TeacherFilters({
   subjects,
@@ -13,52 +16,43 @@ export function TeacherFilters({
     <form
       method="get"
       action="/admin/teachers"
-      className="rounded-card border-border bg-surface mb-4 space-y-2 border p-3"
+      className="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm mb-6 flex flex-col sm:flex-row gap-3"
     >
-      <div>
-        <label className="text-muted mb-1 block text-[11px] font-medium uppercase">
-          ស្វែងរក
-        </label>
-        <input
+      <div className="relative flex-1">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+        <Input
           name="q"
           type="text"
           defaultValue={q}
-          placeholder="ឈ្មោះគ្រូ"
-          className="rounded-btn border-border bg-surface w-full border px-3 py-2 text-sm"
+          placeholder="ស្វែងរកឈ្មោះគ្រូ..."
+          className="pl-10 h-11 bg-slate-50 border-transparent focus:bg-white"
         />
       </div>
 
-      <div>
-        <label className="text-muted mb-1 block text-[11px] font-medium uppercase">
-          មុខវិជ្ជាជំនាញ
-        </label>
+      <div className="flex gap-2">
         <select
           name="subject"
           defaultValue={subjectId}
-          className="rounded-btn border-border bg-surface w-full border px-3 py-2 text-sm"
+          className="rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 h-11 sm:w-56"
         >
-          <option value="">— គ្រប់មុខវិជ្ជា —</option>
+          <option value="">-- គ្រប់មុខវិជ្ជាជំនាញ --</option>
           {subjects.map((s) => (
             <option key={s.id} value={s.id}>
               {s.subject_name} · {s.code}
             </option>
           ))}
         </select>
-      </div>
 
-      <div className="flex gap-2">
-        <button
-          type="submit"
-          className="touch-target rounded-btn bg-brand-600 flex-1 px-4 text-sm font-medium text-white active:bg-brand-700"
-        >
-          រក
-        </button>
-        <a
-          href="/admin/teachers"
-          className="touch-target rounded-btn border-border bg-surface flex items-center border px-4 text-sm active:bg-slate-50"
-        >
-          សម្អាត
-        </a>
+        <Button type="submit" className="h-11 px-6">រក</Button>
+        
+        {(q || subjectId) && (
+          <a
+            href="/admin/teachers"
+            className="inline-flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 px-3 text-sm transition-colors"
+          >
+            សម្អាត
+          </a>
+        )}
       </div>
     </form>
   );

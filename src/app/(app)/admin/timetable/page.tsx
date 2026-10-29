@@ -1,22 +1,17 @@
 import Link from "next/link";
 import { connection } from "next/server";
-import { AppShell } from "@/components/app-shell";
-import {
-  listAcademicYears,
-  getCurrentAcademicYear,
-} from "@/lib/admin/academic-years/queries";
+import { Settings, Printer } from "lucide-react";
+import { listAcademicYears, getCurrentAcademicYear } from "@/lib/admin/academic-years/queries";
 import { listClassOptions } from "@/lib/admin/teacher-assignments/queries";
-import {
-  listPeriods,
-  listTimetableForClass,
-  listAssignableSubjects,
-} from "@/lib/admin/timetable/queries";
+import { listPeriods, listTimetableForClass, listAssignableSubjects } from "@/lib/admin/timetable/queries";
 import { YearSwitcher } from "../classes/year-switcher";
 import { ClassSwitcher } from "./class-switcher";
 import { TimetableGrid } from "./timetable-grid";
+import { PageHeader } from "@/components/layout/page-header";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const instant = false;
-
 export const metadata = { title: "តារាងកាលវិភាគ" };
 
 export default async function TimetablePage({
@@ -27,19 +22,15 @@ export default async function TimetablePage({
   await connection();
 
   const sp = await searchParams;
-  const [years, current] = await Promise.all([
-    listAcademicYears(),
-    getCurrentAcademicYear(),
-  ]);
-
-  const requested = sp.year ? years.find((y) => y.id === sp.year) : null;
-  const activeYear = requested ?? current ?? years[0] ?? null;
+  const [years, current] = await Promise.all([listAcademicYears(), getCurrentAcademicYear()]);
+  const activeYear = (sp.year && years.find((y) => y.id === sp.year)) || current || years[0] || null;
 
   if (!activeYear) {
     return (
-      <AppShell title="តារាងកាលវិភាគ" backHref="/admin">
-        <p className="text-muted text-sm">សូមបង្កើតឆ្នាំសិក្សាជាមុនសិន។</p>
-      </AppShell>
+      <div className="space-y-6 animate-in fade-in duration-300">
+        <PageHeader title="តារាងកាលវិភាគ" description="គ្រប់គ្រងកាលវិភាគបង្រៀន" />
+        <EmptyState title="មិនទាន់មានឆ្នាំសិក្សា" description="សូមបង្កើតឆ្នាំសិក្សាជាមុនសិន។" />
+      </div>
     );
   }
 
@@ -48,61 +39,57 @@ export default async function TimetablePage({
     listPeriods(activeYear.id),
   ]);
 
-  const activeClass =
-    (sp.class && classes.find((c) => c.id === sp.class)) ||
-    classes[0] ||
-    null;
-
-  const cells = activeClass
-    ? await listTimetableForClass(activeClass.id)
-    : [];
-  const assignableSubjects = activeClass
-    ? await listAssignableSubjects(activeClass.id)
-    : [];
+  const activeClass = (sp.class && classes.find((c) => c.id === sp.class)) || classes[0] || null;
+  const cells = activeClass ? await listTimetableForClass(activeClass.id) : [];
+  const assignableSubjects = activeClass ? await listAssignableSubjects(activeClass.id) : [];
 
   return (
-    <AppShell title="តារាងកាលវិភាគ" backHref="/admin">
-      <YearSwitcher years={years} activeYearId={activeYear.id} basePath="/admin/timetable" />
+    <div className="space-y-6 animate-in fade-in duration-300">
+      <PageHeader 
+        title="តារាងកាលវិភាគ" // 👈 Updated
+        description="គ្រប់គ្រងកាលវិភាគបង្រៀនប្រចាំសប្តាហ៍"
+        action={
+          <Link href={`/admin/timetable/periods?year=${activeYear.id}`}>
+            <Button variant="outline" className="gap-2">
+              <Settings className="h-4 w-4" />
+              កំណត់ម៉ោងបង្រៀន
+            </Button>
+          </Link>
+        }
+      />
 
-      <div className="mb-4 flex gap-2">
-        <Link
-          href={`/admin/timetable/periods?year=${activeYear.id}`}
-          className="touch-target rounded-btn border-border bg-surface flex flex-1 items-center justify-center border px-4 text-sm active:bg-slate-50"
-        >
-          ⚙️ កំណត់ម៉ោងបង្រៀន
-        </Link>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div className="w-full sm:w-auto">
+          <YearSwitcher years={years} activeYearId={activeYear.id} basePath="/admin/timetable" />
+        </div>
+        
+        <div className="w-full sm:w-auto shrink-0 mb-4">
+          <Link href={`/admin/reports/timetable?year=${activeYear.id}`}>
+            <Button variant="outline" className="gap-2 bg-white w-full sm:w-auto">
+              <Printer className="h-4 w-4" />
+              មើលរបាយការណ៍ / បោះពុម្ព
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {periods.length === 0 ? (
-        <div className="rounded-card border border-dashed border-border bg-surface p-6 text-center">
-          <p className="text-muted text-sm">
-            សូមកំណត់ម៉ោងបង្រៀនជាមុនសិន។
-          </p>
-          <Link
-            href={`/admin/timetable/periods?year=${activeYear.id}`}
-            className="text-brand-700 mt-3 inline-block text-sm underline-offset-4 hover:underline"
-          >
-            កំណត់ម៉ោង
-          </Link>
-        </div>
+        <EmptyState 
+          title="មិនទាន់មានម៉ោងបង្រៀន" 
+          description="សូមកំណត់ម៉ោងបង្រៀនជាមុនសិន ទើបអាចបង្កើតតារាងកាលវិភាគបាន។"
+          action={
+            <Link href={`/admin/timetable/periods?year=${activeYear.id}`}>
+              <Button>កំណត់ម៉ោងឥឡូវនេះ</Button>
+            </Link>
+          }
+        />
       ) : classes.length === 0 ? (
-        <div className="rounded-card border border-dashed border-border bg-surface p-6 text-center">
-          <p className="text-muted text-sm">
-            មិនមានថ្នាក់រៀននៅក្នុងឆ្នាំនេះទេ។
-          </p>
-        </div>
+        <EmptyState title="មិនទាន់មានថ្នាក់រៀន" description="សូមបង្កើតថ្នាក់រៀនជាមុនសិន។" />
       ) : !activeClass ? (
-        <div className="rounded-card border border-dashed border-border bg-surface p-6 text-center">
-          <p className="text-muted text-sm">សូមជ្រើសរើសថ្នាក់។</p>
-        </div>
+        <EmptyState title="សូមជ្រើសរើសថ្នាក់" description="សូមជ្រើសរើសថ្នាក់រៀនដើម្បីមើលតារាងកាលវិភាគ។" />
       ) : (
         <>
-          <ClassSwitcher
-            classes={classes}
-            activeClassId={activeClass.id}
-            yearId={activeYear.id}
-          />
-
+          <ClassSwitcher classes={classes} activeClassId={activeClass.id} yearId={activeYear.id} />
           <TimetableGrid
             classId={activeClass.id}
             className={activeClass.class_name}
@@ -112,6 +99,6 @@ export default async function TimetablePage({
           />
         </>
       )}
-    </AppShell>
+    </div>
   );
 }

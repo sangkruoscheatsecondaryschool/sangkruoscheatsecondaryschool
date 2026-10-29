@@ -3,17 +3,17 @@
 import Link from "next/link";
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Edit, Trash2, Mail, Phone, BookOpen } from "lucide-react";
 import type { ActionResult } from "@/lib/actions/types";
 import type { TeacherRow } from "@/lib/admin/teachers/queries";
 import { deleteTeacherAction } from "@/lib/admin/teachers/actions";
 import { useVisibleError } from "@/lib/hooks/use-visible-error";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export function TeacherCard({ teacher }: { teacher: TeacherRow }) {
   const router = useRouter();
-  const [state, action, pending] = useActionState<
-    ActionResult | null,
-    FormData
-  >(deleteTeacherAction, null);
+  const [state, action, pending] = useActionState<ActionResult | null, FormData>(deleteTeacherAction, null);
   const visibleError = useVisibleError(state);
 
   useEffect(() => {
@@ -21,73 +21,73 @@ export function TeacherCard({ teacher }: { teacher: TeacherRow }) {
   }, [state, router]);
 
   return (
-    <div className="rounded-card border-border bg-surface border p-3">
-      <Link
-        href={`/admin/teachers/${teacher.id}`}
-        className="block active:opacity-80"
-      >
-        <p className="font-moul truncate text-sm">{teacher.full_name_kh}</p>
-        {teacher.full_name_en ? (
-          <p className="text-muted mt-0.5 text-xs">{teacher.full_name_en}</p>
-        ) : null}
-        {teacher.email ? (
-          <p className="text-muted mt-0.5 truncate font-mono text-xs">
-            {teacher.email}
-          </p>
-        ) : null}
-      </Link>
-
-      <div className="mt-2 flex flex-wrap gap-1.5">
-        {teacher.specialist_1_name ? (
-          <span className="bg-brand-100 text-brand-800 rounded-full px-2 py-0.5 text-[10px] font-medium">
-            {teacher.specialist_1_name}
-          </span>
-        ) : null}
-        {teacher.specialist_2_name ? (
-          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-700">
-            {teacher.specialist_2_name}
-          </span>
-        ) : null}
-      </div>
-
-      {teacher.phone ? (
-        <p className="text-muted mt-1.5 text-xs">📞 {teacher.phone}</p>
-      ) : null}
-
-      {visibleError ? (
-        <div
-          role="alert"
-          className="rounded-btn mt-2 border border-red-200 bg-red-50 p-2 text-xs text-red-700"
-        >
-          {visibleError}
-        </div>
-      ) : null}
-
-      <div className="mt-2 flex flex-wrap gap-2">
-        <Link
-          href={`/admin/teachers/${teacher.id}`}
-          className="touch-target rounded-btn border-border bg-surface flex items-center border px-3 text-xs active:bg-slate-50"
-        >
-          កែប្រែ
+    <Card className="p-5 hover:shadow-md transition-shadow group flex flex-col justify-between">
+      <div>
+        <Link href={`/admin/teachers/${teacher.id}`} className="block">
+          <h3 className="font-moul text-lg truncate group-hover:text-primary-600 transition-colors">
+            {teacher.full_name_kh}
+          </h3>
+          {teacher.full_name_en && (
+            <p className="text-slate-500 text-xs mt-0.5">{teacher.full_name_en}</p>
+          )}
         </Link>
 
-        <form
-          action={action}
-          onSubmit={(e) => {
-            if (!window.confirm(`លុបគ្រូ ${teacher.full_name_kh}?`))
-              e.preventDefault();
-          }}
-        >
-          <input type="hidden" name="teacher_id" value={teacher.id} />
-          <button
-            type="submit"
-            disabled={pending}
-            className="touch-target rounded-btn border border-red-200 px-3 text-xs text-red-700 active:bg-red-50 disabled:opacity-60"
-          >
-            {pending ? "..." : "លុប"}
-          </button>
-        </form>
+        <div className="mt-4 space-y-2 text-sm text-slate-600">
+          {teacher.email && (
+            <div className="flex items-center gap-2">
+              <Mail className="h-4 w-4 text-slate-400 shrink-0" />
+              <span className="font-inter truncate">{teacher.email}</span>
+            </div>
+          )}
+          {teacher.phone && (
+            <div className="flex items-center gap-2">
+              <Phone className="h-4 w-4 text-slate-400 shrink-0" />
+              <span className="font-inter">{teacher.phone}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Specializations */}
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          {teacher.specialist_1_name && (
+            <span className="bg-primary-50 text-primary-700 rounded-md px-2 py-1 text-[11px] font-medium flex items-center gap-1">
+              <BookOpen className="h-3 w-3" />
+              {teacher.specialist_1_name}
+            </span>
+          )}
+          {teacher.specialist_2_name && (
+            <span className="bg-slate-100 text-slate-700 rounded-md px-2 py-1 text-[11px] font-medium flex items-center gap-1">
+              <BookOpen className="h-3 w-3" />
+              {teacher.specialist_2_name}
+            </span>
+          )}
+        </div>
       </div>
-    </div>
+
+      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+        {visibleError ? (
+          <p className="text-xs text-red-600 truncate">{visibleError}</p>
+        ) : <span />}
+        
+        <div className="flex gap-1">
+          <Link href={`/admin/teachers/${teacher.id}`}>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-slate-400 hover:text-primary-600">
+              <Edit className="h-4 w-4" />
+            </Button>
+          </Link>
+          <form
+            action={action}
+            onSubmit={(e) => {
+              if (!window.confirm(`លុបគ្រូ ${teacher.full_name_kh}?`)) e.preventDefault();
+            }}
+          >
+            <input type="hidden" name="teacher_id" value={teacher.id} />
+            <Button type="submit" variant="ghost" size="sm" disabled={pending} className="h-8 w-8 p-0 text-slate-400 hover:text-red-600">
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </form>
+        </div>
+      </div>
+    </Card>
   );
 }

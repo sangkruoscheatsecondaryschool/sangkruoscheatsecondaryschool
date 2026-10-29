@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import type { TeacherOption } from "@/lib/admin/teacher-assignments/queries";
+import { Card } from "@/components/ui/card";
 
 export function TeacherSelector({
   yearId,
@@ -14,59 +14,44 @@ export function TeacherSelector({
   yearName: string;
 }) {
   const router = useRouter();
-  const [teacherId, setTeacherId] = useState("");
-  const [navigating, setNavigating] = useState(false);
 
-  const go = () => {
-    if (!teacherId) return;
-    setNavigating(true);
-    router.push(
-      `/admin/teacher-assignments/manage?year=${yearId}&teacher=${teacherId}`,
-    );
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const teacherId = e.target.value;
+    if (teacherId) {
+      router.push(`/admin/teacher-assignments/manage?year=${yearId}&teacher=${teacherId}`);
+    }
   };
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-card border-border bg-surface border p-3 text-sm">
-        ឆ្នាំសិក្សា៖ <span className="font-medium">{yearName}</span>
+    <div className="space-y-6">
+      <div className="bg-primary-50 text-primary-800 p-4 rounded-xl border border-primary-100 flex items-center justify-between">
+        <span className="font-medium">ឆ្នាំសិក្សា</span>
+        <span className="font-inter font-bold">{yearName}</span>
       </div>
 
       {teachers.length === 0 ? (
-        <div className="rounded-card border border-dashed border-border bg-surface p-6 text-center">
-          <p className="text-muted text-sm">
-            មិនមានគណនីគ្រូនៅឡើយទេ។
-          </p>
-        </div>
+        <Card className="p-8 text-center text-slate-500">
+          មិនមានគណនីគ្រូនៅឡើយទេ។ សូមបង្កើតគណនីគ្រូជាមុនសិន។
+        </Card>
       ) : (
-        <>
-          <div>
-            <label className="text-fg mb-1 block text-sm font-medium">
-              ជ្រើសរើសគ្រូបង្រៀន
-            </label>
+        <Card className="p-6 space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-slate-700">ជ្រើសរើសគ្រូបង្រៀន</label>
             <select
-              value={teacherId}
-              onChange={(e) => setTeacherId(e.target.value)}
-              className="rounded-btn border-border bg-surface w-full border px-3 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+              onChange={handleChange}
+              defaultValue=""
+              className="flex h-12 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100"
             >
-              <option value="">— ជ្រើសរើសគ្រូ —</option>
+              <option value="" disabled>— ជ្រើសរើសគ្រូ —</option>
               {teachers.map((t) => (
                 <option key={t.id} value={t.id}>
-                  {t.full_name_kh}
-                  {t.full_name_en ? ` (${t.full_name_en})` : ""}
+                  {t.full_name_kh} {t.full_name_en ? `(${t.full_name_en})` : ""}
                 </option>
               ))}
             </select>
+            <p className="text-xs text-slate-500 mt-2">ពេលអ្នកជ្រើសរើសគ្រូ ប្រព័ន្ធនឹងបង្ហាញថ្នាក់រៀនដោយស្វ័យប្រវត្តិ។</p>
           </div>
-
-          <button
-            type="button"
-            onClick={go}
-            disabled={!teacherId || navigating}
-            className="touch-target rounded-btn bg-brand-600 w-full px-4 py-3 font-medium text-white active:bg-brand-700 disabled:opacity-60"
-          >
-            {navigating ? "កំពុងផ្ទុក..." : "បន្ត"}
-          </button>
-        </>
+        </Card>
       )}
     </div>
   );

@@ -1,11 +1,13 @@
 import { connection } from "next/server";
-import { AppShell } from "@/components/app-shell";
 import { getCurrentAcademicYear } from "@/lib/admin/academic-years/queries";
 import { fetchSchoolStatistics } from "@/lib/admin/reports/statistics";
 import { StatisticsDashboard } from "./statistics-dashboard";
 import { PrintButton } from "@/components/print/print-button";
 import { SchoolReportHeader } from "@/components/print/school-report-header";
 import { getSchoolSettings } from "@/lib/admin/school/queries";
+import { PageHeader } from "@/components/layout/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Card } from "@/components/ui/card";
 
 export const instant = false;
 export const metadata = { title: "ស្ថិតិសាលា" };
@@ -20,9 +22,10 @@ export default async function StatisticsPage() {
 
   if (!year || !settings) {
     return (
-      <AppShell title="ស្ថិតិសាលា" backHref="/admin/reports">
-        <p className="text-muted text-sm">សូមបង្កើតឆ្នាំសិក្សាជាមុន។</p>
-      </AppShell>
+      <div className="space-y-6">
+        <PageHeader title="ស្ថិតិសាលា" description="ទិដ្ឋភាពទូទៅនៃសិស្ស គ្រូ និងលទ្ធផលសិក្សា" />
+        <EmptyState title="មិនទាន់មានទិន្នន័យ" description="សូមបង្កើតឆ្នាំសិក្សាជាមុនសិន។" />
+      </div>
     );
   }
 
@@ -30,38 +33,43 @@ export default async function StatisticsPage() {
 
   if (!data) {
     return (
-      <AppShell title="ស្ថិតិសាលា" backHref="/admin/reports">
-        <p className="text-muted text-sm">មិនមានទិន្នន័យ។</p>
-      </AppShell>
+      <div className="space-y-6">
+        <PageHeader title="ស្ថិតិសាលា" description="ទិដ្ឋភាពទូទៅនៃសិស្ស គ្រូ និងលទ្ធផលសិក្សា" />
+        <EmptyState title="មិនមានទិន្នន័យ" description="មិនអាចទាញយកទិន្នន័យស្ថិតិបានទេ។" />
+      </div>
     );
   }
 
   return (
-    <AppShell title="ស្ថិតិសាលា" backHref="/admin/reports">
+    <div className="space-y-6 animate-in fade-in duration-300">
       
-      {/* Report Header (Only visible in print) */}
+      {/* Screen Header (Hidden on Print) */}
+      <div className="print:hidden">
+        <PageHeader 
+          title="ស្ថិតិសាលា" 
+          description={`ទិដ្ឋភាពទូទៅសម្រាប់ឆ្នាំសិក្សា ${year.year_name}`} 
+        />
+      </div>
+
+      {/* Official Print Header (Hidden on Screen) */}
       <div className="hidden print:block mb-6">
         <SchoolReportHeader
           settings={settings}
           academicYearName={year.year_name}
           title="របាយការណ៍ស្ថិតិសាលា"
-          subtitle={`ឆ្នាំសិក្សា ${year.year_name}`}
+          subtitle=""
         />
       </div>
 
-      {/* Screen Header */}
-      <div className="mb-4 print:hidden">
-        <h2 className="font-moul text-lg">ស្ថិតិសាលា · {year.year_name}</h2>
-        <p className="text-muted text-sm mt-1">ទិដ្ឋភាពទូទៅនៃសិស្ស គ្រូ និងលទ្ធផលសិក្សា</p>
-      </div>
-
-      <div className="rounded-card border-border bg-surface border p-4 print:border-0 print:p-0 print:bg-transparent">
+      {/* Dashboard Content */}
+      <Card className="p-4 md:p-6 border-slate-200 shadow-sm print:shadow-none print:border-none print:p-0">
         <StatisticsDashboard data={data} />
-      </div>
+      </Card>
 
-      <div className="mt-4 print:hidden">
+      {/* Print Button */}
+      <div className="print:hidden pt-4">
         <PrintButton />
       </div>
-    </AppShell>
+    </div>
   );
 }

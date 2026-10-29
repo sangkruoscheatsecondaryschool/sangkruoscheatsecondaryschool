@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import type {
-  ClassOption,
-  SubjectOption,
-} from "@/lib/admin/teacher-assignments/queries";
+import type { ClassOption, SubjectOption } from "@/lib/admin/teacher-assignments/queries";
+import { Check } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 export function ClassSubjectCard({
   cls,
@@ -15,11 +14,9 @@ export function ClassSubjectCard({
   cls: ClassOption;
   subjects: SubjectOption[];
   initialSelected: string[];
-  takenByOthers: Map<string, string>; // subject_id -> other teacher name
+  takenByOthers: Map<string, string>;
 }) {
-  const [selected, setSelected] = useState<Set<string>>(
-    new Set(initialSelected),
-  );
+  const [selected, setSelected] = useState<Set<string>>(new Set(initialSelected));
 
   const toggle = (id: string) => {
     setSelected((prev) => {
@@ -31,49 +28,46 @@ export function ClassSubjectCard({
   };
 
   return (
-    <div className="rounded-card border-border bg-surface border p-4">
-      <div className="mb-3 flex items-center justify-between gap-2">
+    <Card className="p-5">
+      <div className="flex items-center justify-between mb-4">
         <div>
-          <p className="font-moul text-sm">ថ្នាក់ {cls.class_name}</p>
-          <p className="text-muted text-[11px]">
-            កម្រិតថ្នាក់ទី {cls.grade_level}
-          </p>
+          <h3 className="font-moul text-lg text-slate-900">ថ្នាក់ {cls.class_name}</h3>
+          <p className="text-xs text-slate-500">កម្រិតថ្នាក់ទី {cls.grade_level}</p>
         </div>
-        <span className="bg-brand-100 text-brand-800 rounded-full px-2 py-0.5 text-[11px] font-medium">
+        <span className="bg-primary-50 text-primary-700 px-3 py-1 rounded-full text-xs font-medium">
           {selected.size} មុខវិជ្ជា
         </span>
       </div>
 
       <input type="hidden" name="class_ids" value={cls.id} />
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         {subjects.map((s) => {
           const takenBy = takenByOthers.get(s.id);
           const checked = selected.has(s.id);
 
-          // Disabled: already taught by another teacher
+          // If taught by another teacher, disable it
           if (takenBy) {
             return (
               <div
                 key={s.id}
                 title={`បង្រៀនដោយ ${takenBy}`}
-                className="border-border bg-bg flex cursor-not-allowed flex-col gap-0.5 rounded-btn border px-2.5 py-2 text-xs opacity-60"
+                className="flex flex-col gap-0.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 opacity-60 cursor-not-allowed"
               >
-                <span className="truncate line-through">{s.subject_name}</span>
-                <span className="text-muted truncate text-[10px]">
-                  បង្រៀនដោយ {takenBy}
-                </span>
+                <span className="text-sm text-slate-500 truncate line-through">{s.subject_name}</span>
+                <span className="text-[10px] text-slate-400 truncate">បង្រៀនដោយ {takenBy}</span>
               </div>
             );
           }
 
+          // Active checkbox
           return (
             <label
               key={s.id}
-              className={`flex cursor-pointer items-center gap-2 rounded-btn border px-2.5 py-2 text-xs transition-colors ${
+              className={`flex cursor-pointer items-center gap-2.5 rounded-xl border px-3 py-2.5 transition-colors ${
                 checked
-                  ? "border-brand-500 bg-brand-50 text-brand-800"
-                  : "border-border bg-bg text-fg active:bg-slate-100"
+                  ? "border-primary-500 bg-primary-50 text-primary-900 shadow-sm"
+                  : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
               }`}
             >
               <input
@@ -85,35 +79,17 @@ export function ClassSubjectCard({
                 className="sr-only"
               />
               <span
-                aria-hidden
-                className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
-                  checked
-                    ? "border-brand-600 bg-brand-600"
-                    : "border-border bg-surface"
+                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
+                  checked ? "border-primary-600 bg-primary-600" : "border-slate-300 bg-white"
                 }`}
               >
-                {checked ? (
-                  <svg
-                    width="10"
-                    height="10"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M5 12l5 5L20 7" />
-                  </svg>
-                ) : null}
+                {checked && <Check className="h-3.5 w-3.5 text-white" />}
               </span>
-              <span className="min-w-0 flex-1 truncate">
-                {s.subject_name}
-              </span>
+              <span className="text-sm font-medium truncate">{s.subject_name}</span>
             </label>
           );
         })}
       </div>
-    </div>
+    </Card>
   );
 }

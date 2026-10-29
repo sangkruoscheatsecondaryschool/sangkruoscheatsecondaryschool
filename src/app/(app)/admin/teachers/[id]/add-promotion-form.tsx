@@ -2,26 +2,17 @@
 
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Save } from "lucide-react";
 import type { ActionResult } from "@/lib/actions/types";
 import type { SalaryPosition } from "@/lib/admin/teachers/salary-queries";
 import { addPromotionAction } from "@/lib/admin/teachers/salary-actions";
 import { useVisibleError } from "@/lib/hooks/use-visible-error";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
-export function AddPromotionForm({
-  teacherId,
-  positions,
-  onSuccess,
-}: {
-  teacherId: string;
-  positions: SalaryPosition[];
-  onSuccess?: () => void;
-}) {
+export function AddPromotionForm({ teacherId, positions, onSuccess }: { teacherId: string; positions: SalaryPosition[]; onSuccess?: () => void }) {
   const router = useRouter();
-  const [state, action, pending] = useActionState<
-    ActionResult | null,
-    FormData
-  >(addPromotionAction, null);
-
+  const [state, action, pending] = useActionState<ActionResult | null, FormData>(addPromotionAction, null);
   const visibleError = useVisibleError(state);
 
   useEffect(() => {
@@ -34,86 +25,33 @@ export function AddPromotionForm({
   const today = new Date().toISOString().slice(0, 10);
 
   return (
-    <form
-      action={action}
-      className="space-y-3 rounded-btn border border-dashed border-border bg-bg p-3"
-    >
+    <form action={action} className="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
       <input type="hidden" name="teacher_id" value={teacherId} />
-
-      <div>
-        <label className="text-fg mb-1 block text-xs font-medium">
-          កាំប្រាក់ថ្មី *
-        </label>
-        <select
-          name="position_id"
-          required
-          defaultValue=""
-          className="rounded-btn border-border bg-surface w-full border px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-        >
-          <option value="" disabled>
-            — ជ្រើសរើសកាំប្រាក់ —
-          </option>
-          {positions.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.display_label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label className="text-fg mb-1 block text-xs font-medium">
-          ថ្ងៃចាប់ផ្ដើម *
-        </label>
-        <input
-          name="start_date"
-          type="date"
-          defaultValue={today}
-          required
-          className="rounded-btn border-border bg-surface w-full border px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-        />
-      </div>
-
-      <div>
-        <label className="text-fg mb-1 block text-xs font-medium">
-          លេខសេចក្ដីសម្រេច
-        </label>
-        <input
-          name="decision_number"
-          type="text"
-          maxLength={100}
-          className="rounded-btn border-border bg-surface w-full border px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-        />
-      </div>
-
-      <div>
-        <label className="text-fg mb-1 block text-xs font-medium">
-          កំណត់សម្គាល់
-        </label>
-        <textarea
-          name="notes"
-          rows={2}
-          maxLength={500}
-          className="rounded-btn border-border bg-surface w-full border px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-        />
-      </div>
-
-      {visibleError ? (
-        <div
-          role="alert"
-          className="rounded-btn border border-red-200 bg-red-50 p-2 text-xs text-red-700"
-        >
-          {visibleError}
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-slate-700">កាំប្រាក់ថ្មី *</label>
+          <select name="position_id" required defaultValue="" className="flex h-11 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100">
+            <option value="" disabled>— ជ្រើសរើស —</option>
+            {positions.map((p) => <option key={p.id} value={p.id}>{p.display_label}</option>)}
+          </select>
         </div>
-      ) : null}
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-slate-700">ថ្ងៃចាប់ផ្ដើម *</label>
+          <Input name="start_date" type="date" defaultValue={today} required className="h-11" />
+        </div>
+      </div>
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="touch-target rounded-btn bg-brand-600 w-full px-4 py-2.5 text-sm font-medium text-white active:bg-brand-700 disabled:opacity-60"
-      >
-        {pending ? "កំពុងរក្សាទុក..." : "រក្សាទុក"}
-      </button>
+      <div className="space-y-1.5">
+        <label className="text-sm font-medium text-slate-700">លេខសេចក្ដីសម្រេច</label>
+        <Input name="decision_number" type="text" className="h-11" />
+      </div>
+
+      {visibleError && <div className="text-sm text-red-600">{visibleError}</div>}
+
+      <Button type="submit" disabled={pending} className="w-full gap-2">
+        <Save className="h-4 w-4" /> {pending ? "កំពុងរក្សាទុក..." : "រក្សាទុក"}
+      </Button>
     </form>
   );
 }

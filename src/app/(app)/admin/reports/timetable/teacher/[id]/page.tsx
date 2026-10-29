@@ -1,18 +1,16 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
-import { AppShell } from "@/components/app-shell";
+import { ArrowLeft } from "lucide-react";
 import { getSchoolSettings } from "@/lib/admin/school/queries";
 import { fetchTeacherTimetable } from "@/lib/admin/reports/timetable";
 import { TimetableReportView } from "@/components/print/timetable-report-view";
 import { PrintButton } from "@/components/print/print-button";
+import { Card } from "@/components/ui/card";
 
 export const instant = false;
 
-export default async function TeacherTimetableReportPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function TeacherTimetableReportPage({ params }: { params: Promise<{ id: string }> }) {
   await connection();
   const { id } = await params;
 
@@ -24,13 +22,18 @@ export default async function TeacherTimetableReportPage({
   if (!grid || !settings) notFound();
 
   return (
-    <AppShell title={`តារាងកាលវិភាគ · ${grid.class_name}`} backHref="/admin/reports/timetable/teacher">
-      <div className="rounded-card border-border bg-white border p-4 print:border-0 print:p-0">
+    <div className="space-y-6 animate-in fade-in duration-300">
+      <Link href="/admin/reports/timetable/teacher" className="inline-flex items-center text-sm text-slate-500 hover:text-primary-600 mb-2 print:hidden">
+        <ArrowLeft className="h-4 w-4 mr-1" /> ត្រឡប់ក្រោយ
+      </Link>
+      
+      <Card className="p-4 md:p-8 print:p-0 print:border-none print:shadow-none">
         <TimetableReportView grid={grid} settings={settings} mode="teacher" />
-      </div>
-      <div className="mt-4 print:hidden">
+      </Card>
+      
+      <div className="print:hidden">
         <PrintButton />
       </div>
-    </AppShell>
+    </div>
   );
 }

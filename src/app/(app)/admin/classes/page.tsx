@@ -1,16 +1,15 @@
 import Link from "next/link";
 import { connection } from "next/server";
-import { AppShell } from "@/components/app-shell";
-import {
-  listAcademicYears,
-  getCurrentAcademicYear,
-} from "@/lib/admin/academic-years/queries";
+import { Plus } from "lucide-react";
+import { listAcademicYears, getCurrentAcademicYear } from "@/lib/admin/academic-years/queries";
 import { listClassesForYear } from "@/lib/admin/classes/queries";
 import { ClassCard } from "./class-card";
 import { YearSwitcher } from "./year-switcher";
+import { PageHeader } from "@/components/layout/page-header";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const instant = false;
-
 export const metadata = { title: "ថ្នាក់រៀន" };
 
 export default async function ClassesPage({
@@ -21,19 +20,13 @@ export default async function ClassesPage({
   await connection();
 
   const { year: yearParam } = await searchParams;
-  const [years, current] = await Promise.all([
-    listAcademicYears(),
-    getCurrentAcademicYear(),
-  ]);
+  const [years, current] = await Promise.all([listAcademicYears(), getCurrentAcademicYear()]);
 
   const requested = yearParam ? years.find((y) => y.id === yearParam) : null;
   const activeYear = requested ?? current ?? years[0] ?? null;
 
-  const classes = activeYear
-    ? await listClassesForYear(activeYear.id)
-    : [];
+  const classes = activeYear ? await listClassesForYear(activeYear.id) : [];
 
-  // Group by grade
   const groups = new Map<number, typeof classes>();
   for (const c of classes) {
     const list = groups.get(c.grade_level) ?? [];
@@ -42,52 +35,54 @@ export default async function ClassesPage({
   }
 
   return (
-    <AppShell title="ថ្នាក់រៀន" backHref="/admin">
+    <div className="space-y-6 animate-in fade-in duration-300">
+      <PageHeader 
+        title="គ្រប់គ្រងថ្នាក់រៀន" 
+        description="រៀបចំថ្នាក់រៀន និងកំណត់គ្រូបន្ទុកថ្នាក់"
+        action={
+          activeYear ? (
+            <Link href={`/admin/classes/new?year=${activeYear.id}`}>
+              <Button className="gap-2">
+                <Plus className="h-4 w-4" />
+                បន្ថែមថ្នាក់ថ្មី
+              </Button>
+            </Link>
+          ) : null
+        }
+      />
+
       <YearSwitcher years={years} activeYearId={activeYear?.id ?? null} basePath="/admin/classes" />
 
-      {activeYear ? (
-        <Link
-          href={`/admin/classes/new?year=${activeYear.id}`}
-          className="touch-target rounded-btn bg-brand-600 mb-4 flex w-full items-center justify-center px-4 font-medium text-white active:bg-brand-700"
-        >
-          + បន្ថែមថ្នាក់ថ្មី
-        </Link>
-      ) : null}
-
       {!activeYear ? (
-        <div className="rounded-card border border-dashed border-border bg-surface p-6 text-center">
-          <p className="text-muted text-sm">
-            សូមបង្កើតឆ្នាំសិក្សាជាមុនសិន។
-          </p>
-        </div>
+        <EmptyState title="មិនទាន់មានឆ្នាំសិក្សា" description="សូមបង្កើតឆ្នាំសិក្សាជាមុនសិន។" />
       ) : classes.length === 0 ? (
-        <div className="rounded-card border border-dashed border-border bg-surface p-6 text-center">
-          <p className="text-muted text-sm">
-            មិនមានថ្នាក់រៀនសម្រាប់ឆ្នាំ {activeYear.year_name} នៅឡើយទេ។
-          </p>
-        </div>
+        <EmptyState 
+          title="មិនទាន់មានថ្នាក់រៀន" 
+          description={`មិនទាន់មានថ្នាក់រៀនសម្រាប់ឆ្នាំ ${activeYear.year_name} នៅឡើយទេ។`}
+          action={
+            <Link href={`/admin/classes/new?year=${activeYear.id}`}>
+              <Button variant="outline">បង្កើតថ្នាក់ដំបូង</Button>
+            </Link>
+          }
+        />
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-8">
           {[7, 8, 9].map((grade) => {
             const list = groups.get(grade) ?? [];
             if (list.length === 0) return null;
             return (
               <section key={grade}>
-                <h2 className="font-moul text-muted mb-2 text-sm">
-                  ថ្នាក់ទី {grade}
-                </h2>
-                <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <h2 className="font-moul text-slate-800 mb-4 text-lg">ថ្នាក់ទី {grade}</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   {list.map((c) => (
-                    <li key={`${c.id}-${c.student_count}`}>
-                      <ClassCard cls={c} />
-                    </li>
+                    <ClassCard key={`${c.id}-${c.student_count}`} cls={c} />
                   ))}
-                </ul>
+                </div>
               </section>
             );
           })}
         </div>
       )}
-    </AppShell>
+    </div>
   );
 }

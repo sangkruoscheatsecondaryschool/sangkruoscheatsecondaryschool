@@ -1,16 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
-import { AppShell } from "@/components/app-shell";
+import { ArrowLeft } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/get-current-user";
 import { getTeacherClassDetail } from "@/lib/teacher/queries";
-import {
-  listSubjectsForScoreEntry,
-  listTermMonthsForYear,
-  getScoreEntryContext,
-} from "@/lib/teacher/scores-queries";
+import { listSubjectsForScoreEntry, listTermMonthsForYear, getScoreEntryContext } from "@/lib/teacher/scores-queries";
 import { ScoreEntryForm } from "./score-entry-form";
 import { SelectorEmpty } from "./selector-empty";
+import { Card } from "@/components/ui/card";
 
 export const instant = false;
 
@@ -37,191 +34,104 @@ export default async function ScoreEntryPage({
     listTermMonthsForYear(detail.academic_year_id),
   ]);
 
-  const allMonths = terms.flatMap((t) =>
-    t.months.map((m) => ({ ...m, term_number: t.term_number })),
-  );
+  const allMonths = terms.flatMap((t) => t.months.map((m) => ({ ...m, term_number: t.term_number })));
 
-  const validSubject =
-    sp.subject && subjects.some((s) => s.id === sp.subject)
-      ? sp.subject
-      : undefined;
-  const validMonth =
-    sp.month && allMonths.some((m) => m.id === sp.month)
-      ? sp.month
-      : undefined;
+  const validSubject = sp.subject && subjects.some((s) => s.id === sp.subject) ? sp.subject : undefined;
+  const validMonth = sp.month && allMonths.some((m) => m.id === sp.month) ? sp.month : undefined;
 
   return (
-    <AppShell
-      title={`បញ្ចូលពិន្ទុ · ${detail.class_name}`}
-      backHref={`/teacher/classes/${classId}`}
-    >
+    <div className="space-y-6 animate-in fade-in duration-300 pb-20 max-w-4xl mx-auto">
+      <Link href={`/teacher/classes/${classId}`} className="inline-flex items-center text-sm text-slate-500 hover:text-primary-600 mb-2">
+        <ArrowLeft className="h-4 w-4 mr-1" /> ត្រឡប់ក្រោយ
+      </Link>
+
+      <div>
+        <h1 className="font-moul text-2xl text-slate-900">បញ្ចូលពិន្ទុ · {detail.class_name}</h1>
+        <p className="text-slate-500 mt-1 text-sm">ជ្រើសរើសមុខវិជ្ជា និងខែ ដើម្បីបញ្ចូលពិន្ទុសិស្ស</p>
+      </div>
+
       {subjects.length === 0 ? (
-        <div className="rounded-card border border-dashed border-border bg-surface p-6 text-center">
-          <p className="text-muted text-sm">
-            អ្នកមិនមានមុខវិជ្ជាដែលត្រូវបញ្ចូលពិន្ទុក្នុងថ្នាក់នេះទេ។
-          </p>
-          <Link
-            href={`/teacher/classes/${classId}`}
-            className="text-brand-700 mt-3 inline-block text-sm underline-offset-4 hover:underline"
-          >
-            ត្រឡប់ទៅថ្នាក់
-          </Link>
-        </div>
+        <Card className="p-8 text-center text-slate-500">
+          អ្នកមិនមានមុខវិជ្ជាដែលត្រូវបញ្ចូលពិន្ទុក្នុងថ្នាក់នេះទេ។
+        </Card>
       ) : (
         <>
-          {/* Selector */}
-          <div className="rounded-card border-border bg-surface mb-4 space-y-3 border p-3">
-            <p className="text-muted text-[10px] font-medium uppercase">
-              ជ្រើសរើសមុខវិជ្ជា និងខែ
-            </p>
+          {/* Selectors */}
+          <Card className="p-4 md:p-6 space-y-6 bg-white border-slate-200">
+            <div>
+              <p className="text-[11px] font-medium text-slate-500 uppercase mb-3">មុខវិជ្ជា</p>
+              <div className="-mx-1 flex gap-2 overflow-x-auto pb-1">
+                {subjects.map((s) => {
+                  const active = s.id === validSubject;
+                  const href = `/teacher/classes/${classId}/scores?subject=${s.id}${validMonth ? `&month=${validMonth}` : ""}`;
+                  return (
+                    <Link
+                      key={s.id}
+                      href={href}
+                      className={`shrink-0 rounded-xl border px-4 py-2 text-sm font-medium transition-all ${
+                        active
+                          ? "border-primary-600 bg-primary-600 text-white shadow-sm"
+                          : "border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100"
+                      }`}
+                    >
+                      {s.subject_name}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
 
-            <SubjectPills
-              classId={classId}
-              subjects={subjects}
-              activeId={validSubject ?? ""}
-              monthId={validMonth ?? ""}
-            />
-
-            <TermMonthChips
-              classId={classId}
-              terms={terms}
-              subjectId={validSubject ?? ""}
-              activeId={validMonth ?? ""}
-            />
-          </div>
+            <div>
+              <p className="text-[11px] font-medium text-slate-500 uppercase mb-3">ខែ</p>
+              <div className="space-y-4">
+                {terms.map((t) => (
+                  <div key={t.term_number}>
+                    <p className="text-xs text-slate-400 mb-2">{t.term_name_kh}</p>
+                    <div className="-mx-1 flex gap-2 overflow-x-auto pb-1">
+                      {t.months.map((m) => {
+                        const active = m.id === validMonth;
+                        const href = `/teacher/classes/${classId}/scores?${validSubject ? `subject=${validSubject}&` : ""}month=${m.id}`;
+                        return (
+                          <Link
+                            key={m.id}
+                            href={href}
+                            className={`shrink-0 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all ${
+                              active
+                                ? m.is_semester_exam
+                                  ? "border-amber-500 bg-amber-500 text-white shadow-sm"
+                                  : "border-primary-600 bg-primary-600 text-white shadow-sm"
+                                : m.is_semester_exam
+                                  ? "border-amber-200 bg-amber-50 text-amber-900 hover:bg-amber-100"
+                                  : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                            }`}
+                          >
+                            {m.month_name_kh}
+                            {m.is_semester_exam ? " · ប្រឡងឆមាស" : ""}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
 
           {!validSubject || !validMonth ? (
-            <SelectorEmpty
-              hasSubjects={subjects.length > 0}
-              hasMonth={!!validMonth}
-            />
+            <SelectorEmpty hasSubjects={subjects.length > 0} hasMonth={!!validMonth} />
           ) : (
-            <ScoreEntryLoader
-              classId={classId}
-              subjectId={validSubject}
-              monthId={validMonth}
-              months={allMonths}
-            />
+            <ScoreEntryLoader classId={classId} subjectId={validSubject} monthId={validMonth} months={allMonths} />
           )}
         </>
       )}
-    </AppShell>
-  );
-}
-
-// ------------------- Subcomponents -------------------
-
-import type { SubjectOption, TermMonthGroup } from "@/lib/teacher/scores-queries";
-
-function SubjectPills({
-  classId,
-  subjects,
-  activeId,
-  monthId,
-}: {
-  classId: string;
-  subjects: SubjectOption[];
-  activeId: string;
-  monthId: string;
-}) {
-  return (
-    <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1">
-      {subjects.map((s) => {
-        const active = s.id === activeId;
-        const href = `/teacher/classes/${classId}/scores?subject=${s.id}${
-          monthId ? `&month=${monthId}` : ""
-        }`;
-        return (
-          <Link
-            key={s.id}
-            href={href}
-            className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-              active
-                ? "border-brand-600 bg-brand-600 text-white"
-                : "border-border bg-bg text-fg active:bg-slate-100"
-            }`}
-          >
-            {s.subject_name}
-          </Link>
-        );
-      })}
     </div>
   );
 }
 
-function TermMonthChips({
-  classId,
-  terms,
-  subjectId,
-  activeId,
-}: {
-  classId: string;
-  terms: TermMonthGroup[];
-  subjectId: string;
-  activeId: string;
-}) {
-  return (
-    <div className="space-y-2">
-      {terms.map((t) => (
-        <div key={t.term_number}>
-          <p className="text-muted mb-1 text-[10px] font-medium uppercase">
-            {t.term_name_kh}
-          </p>
-          <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-0.5">
-            {t.months.map((m) => {
-              const active = m.id === activeId;
-              const href = `/teacher/classes/${classId}/scores?${
-                subjectId ? `subject=${subjectId}&` : ""
-              }month=${m.id}`;
-              return (
-                <Link
-                  key={m.id}
-                  href={href}
-                  className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                    active
-                      ? m.is_semester_exam
-                        ? "border-amber-600 bg-amber-500 text-white"
-                        : "border-brand-600 bg-brand-600 text-white"
-                      : m.is_semester_exam
-                        ? "border-amber-300 bg-amber-50 text-amber-900 active:bg-amber-100"
-                        : "border-border bg-bg text-fg active:bg-slate-100"
-                  }`}
-                >
-                  {m.month_name_kh}
-                  {m.is_semester_exam ? " · ប្រឡង" : ""}
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-async function ScoreEntryLoader({
-  classId,
-  subjectId,
-  monthId,
-  months,
-}: {
-  classId: string;
-  subjectId: string;
-  monthId: string;
-  months: { id: string; month_name_kh: string; is_semester_exam: boolean }[];
-}) {
+async function ScoreEntryLoader({ classId, subjectId, monthId }: { classId: string; subjectId: string; monthId: string; months: any[] }) {
   const ctx = await getScoreEntryContext(classId, subjectId, monthId);
   if (!ctx) {
-    return (
-      <div className="rounded-card border border-dashed border-border bg-surface p-6 text-center">
-        <p className="text-muted text-sm">រកមិនឃើញទិន្នន័យ។</p>
-      </div>
-    );
+    return <Card className="p-8 text-center text-slate-500">រកមិនឃើញទិន្នន័យ។</Card>;
   }
-  return (
-    <ScoreEntryForm
-      key={`${ctx.subject_id}__${ctx.term_month_id}`}
-      ctx={ctx}
-    />
-  );
+  return <ScoreEntryForm key={`${subjectId}-${monthId}`} ctx={ctx} />;
 }

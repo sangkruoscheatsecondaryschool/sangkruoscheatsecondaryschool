@@ -1,26 +1,25 @@
+import Link from "next/link";
 import { connection } from "next/server";
-import { AppShell } from "@/components/app-shell";
-import {
-  listAcademicYears,
-  getCurrentAcademicYear,
-} from "@/lib/admin/academic-years/queries";
+import { ArrowLeft } from "lucide-react";
+import { listAcademicYears, getCurrentAcademicYear } from "@/lib/admin/academic-years/queries";
 import { listClassOptions } from "@/lib/admin/teacher-assignments/queries";
 import { listTermMonthsForYear } from "@/lib/teacher/scores-queries";
 import { getSchoolSettings } from "@/lib/admin/school/queries";
 import { fetchSemesterRanking } from "@/lib/admin/reports/ranking";
 import { RankingReportView } from "@/components/print/ranking-report-view";
 import { PrintButton } from "@/components/print/print-button";
+import { PageHeader } from "@/components/layout/page-header";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const instant = false;
+export const metadata = { title: "ចំណាត់ថ្នាក់ប្រចាំឆមាស" };
 
-export default async function SemesterRankingPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ year?: string; class?: string; term?: number }>;
-}) {
+export default async function SemesterRankingPage({ searchParams }: { searchParams: Promise<{ year?: string; class?: string; term?: string }> }) {
   await connection();
-
   const sp = await searchParams;
+  
   const [years, current, settings] = await Promise.all([
     listAcademicYears(),
     getCurrentAcademicYear(),
@@ -28,11 +27,13 @@ export default async function SemesterRankingPage({
   ]);
 
   const activeYear = (sp.year && years.find((y) => y.id === sp.year)) || current || years[0];
+
   if (!activeYear || !settings) {
     return (
-      <AppShell title="ចំណាត់ថ្នាក់ប្រចាំឆមាស" backHref="/admin/reports/ranking">
-        <p className="text-muted text-sm">សូមបង្កើតឆ្នាំសិក្សាជាមុន។</p>
-      </AppShell>
+      <div className="space-y-6">
+        <Link href="/admin/reports/ranking" className="text-sm text-slate-500 hover:text-primary-600 flex items-center"><ArrowLeft className="h-4 w-4 mr-1" /> ត្រឡប់ក្រោយ</Link>
+        <EmptyState title="មិនទាន់មានទិន្នន័យ" description="សូមបង្កើតឆ្នាំសិក្សាជាមុនសិន។" />
+      </div>
     );
   }
 
@@ -41,94 +42,69 @@ export default async function SemesterRankingPage({
     listTermMonthsForYear(activeYear.id),
   ]);
 
-  const activeClass =
-    (sp.class && classes.find((c) => c.id === sp.class)) || classes[0] || null;
-  const activeTermNumber = sp.term ?? 1;
-  const activeTermGroup =
-    termGroups.find((t) => t.term_number === activeTermNumber) ?? termGroups[0];
-
-  // Fetch term id from a separate call
+  const activeClass = (sp.class && classes.find((c) => c.id === sp.class)) || classes[0] || null;
+  const activeTermNumber = Number(sp.term) || 1;
+  
   let report = null;
-  if (activeClass && activeTermGroup) {
-    // We need the academic_term id — it's stored in term_months.academic_term_id
-    const { createClient } = await import("@/lib/supabase/server");
-    const supabase = await createClient();
-    const { data } = await supabase
-      .from("academic_terms")
-      .select("id")
-      .eq("academic_year_id", activeYear.id)
-      .eq("term_number", activeTermNumber)
-      .maybeSingle();
-    if (data?.id) {
-      report = await fetchSemesterRanking(activeClass.id, data.id);
+  if (activeClass) {
+    const termGroup = termGroups.find(t => t.term_number === activeTermNumber);
+    if (termGroup) {
+      // Need the actual academic_term_id, which isn't in the termGroup return type directly, 
+      // so we fetch it or adapt the fetchSemesterRanking to take term_number. 
+      // Assuming fetchSemesterRanking takes academic_term_id. Let's fetch it quickly.
+      const { createClient } = await import("@/lib/supabase/server");
+      const supabase = await createClient();
+      const { data } = await supabase.from("academic_terms").select("id").eq("academic_year_id", activeYear.id).eq("term_number", activeTermNumber).maybeSingle();
+      if (data?.id) {
+        report = await fetchSemesterRanking(activeClass.id, data.id);
+      }
     }
   }
 
   return (
-    <AppShell title="ចំណាត់ថ្នាក់ប្រចាំឆមាស" backHref="/admin/reports/ranking">
-      <form
-        method="get"
-        action="/admin/reports/ranking/semester"
-        className="rounded-card border-border bg-surface mb-4 space-y-2 border p-3 print:hidden"
-      >
-        <input type="hidden" name="year" value={activeYear.id} />
+    <div className="space-y-6 animate-in fade-in duration-300">
+      <Link href="/admin/reports/ranking" className="inline-flex items-center text-sm text-slate-500 hover:text-primary-600 mb-2">
+        <ArrowLeft className="h-4 w-4 mr-1" /> ត្រឡប់ក្រោយ
+      </Link>
+      
+      <PageHeader title="ចំណាត់ថ្នាក់ប្រចាំឆមាស" description="បង្ហាញលទ្ធផលមធ្យមភាគឆមាស" />
 
-        <div>
-          <label className="text-muted mb-1 block text-[10px] uppercase">
-            ថ្នាក់
-          </label>
-          <select
-            name="class"
-            defaultValue={activeClass?.id ?? ""}
-            className="rounded-btn border-border bg-surface w-full border px-3 py-2 text-sm"
-          >
-            {classes.map((c) => (
-              <option key={c.id} value={c.id}>
-                ថ្នាក់ទី {c.grade_level} · {c.class_name}
-              </option>
-            ))}
+      <form method="get" action="/admin/reports/ranking/semester" className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-3 print:hidden">
+        <div className="flex-1 space-y-1">
+          <label className="text-[11px] font-medium text-slate-500 uppercase">ឆ្នាំសិក្សា</label>
+          <select name="year" defaultValue={activeYear.id} className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+            {years.map((y) => <option key={y.id} value={y.id}>{y.year_name}</option>)}
           </select>
         </div>
-
-        <div>
-          <label className="text-muted mb-1 block text-[10px] uppercase">
-            ឆមាស
-          </label>
-          <select
-            name="term"
-            defaultValue={String(activeTermNumber)}
-            className="rounded-btn border-border bg-surface w-full border px-3 py-2 text-sm"
-          >
-            {termGroups.map((t) => (
-              <option key={t.term_number} value={t.term_number}>
-                {t.term_name_kh}
-              </option>
-            ))}
+        <div className="flex-1 space-y-1">
+          <label className="text-[11px] font-medium text-slate-500 uppercase">ថ្នាក់រៀន</label>
+          <select name="class" defaultValue={activeClass?.id ?? ""} className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+            {classes.map((c) => <option key={c.id} value={c.id}>ថ្នាក់ទី {c.grade_level} · {c.class_name}</option>)}
           </select>
         </div>
-
-        <button
-          type="submit"
-          className="touch-target rounded-btn bg-brand-600 w-full px-4 py-2 text-sm font-medium text-white active:bg-brand-700"
-        >
-          បង្ហាញ
-        </button>
+        <div className="flex-1 space-y-1">
+          <label className="text-[11px] font-medium text-slate-500 uppercase">ឆមាស</label>
+          <select name="term" defaultValue={activeTermNumber} className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+            {termGroups.map((t) => <option key={t.term_number} value={t.term_number}>{t.term_name_kh}</option>)}
+          </select>
+        </div>
+        <div className="flex items-end">
+          <Button type="submit" className="h-11 px-8">បង្ហាញ</Button>
+        </div>
       </form>
 
       {!report ? (
-        <div className="rounded-card border border-dashed border-border bg-surface p-6 text-center print:hidden">
-          <p className="text-muted text-sm">សូមជ្រើសរើសថ្នាក់ និងឆមាស។</p>
-        </div>
+        <EmptyState title="រកមិនឃើញទិន្នន័យ" description="សូមជ្រើសរើសថ្នាក់ និងឆមាសដើម្បីបង្ហាញរបាយការណ៍។" />
       ) : (
         <>
-          <div className="rounded-card border-border bg-white border p-4 print:border-0 print:p-0">
+          <Card className="p-4 md:p-8 print:p-0 print:border-none print:shadow-none">
             <RankingReportView report={report} settings={settings} />
-          </div>
-          <div className="mt-4 print:hidden">
+          </Card>
+          <div className="print:hidden">
             <PrintButton />
           </div>
         </>
       )}
-    </AppShell>
+    </div>
   );
 }

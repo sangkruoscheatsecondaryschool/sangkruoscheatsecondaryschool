@@ -1,4 +1,7 @@
+import { Search } from "lucide-react";
 import type { ClassOption } from "@/lib/admin/students/queries";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export function StudentFilters({
   classes,
@@ -15,54 +18,45 @@ export function StudentFilters({
     <form
       method="get"
       action="/admin/students"
-      className="rounded-card border-border bg-surface mb-4 space-y-2 border p-3"
+      className="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm mb-6 flex flex-col sm:flex-row gap-3"
     >
       <input type="hidden" name="year" value={yearId} />
 
-      <div>
-        <label className="text-muted mb-1 block text-[11px] font-medium uppercase">
-          ថ្នាក់
-        </label>
+      <div className="relative flex-1">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+        <Input
+          name="q"
+          type="text"
+          defaultValue={q}
+          placeholder="ស្វែងរកឈ្មោះ ឬលេខកូដសិស្ស..."
+          className="pl-10 h-11 bg-slate-50 border-transparent focus:bg-white"
+        />
+      </div>
+
+      <div className="flex gap-2">
         <select
           name="class"
           defaultValue={activeClassId}
-          className="rounded-btn border-border bg-surface w-full border px-3 py-2 text-sm"
+          className="rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 h-11 sm:w-48"
         >
-          <option value="">— គ្រប់ថ្នាក់ —</option>
+          <option value="">-- គ្រប់ថ្នាក់ --</option>
           {classes.map((c) => (
             <option key={c.id} value={c.id}>
               ថ្នាក់ទី {c.grade_level} · {c.class_name}
             </option>
           ))}
         </select>
-      </div>
 
-      <div>
-        <label className="text-muted mb-1 block text-[11px] font-medium uppercase">
-          ស្វែងរក
-        </label>
-        <input
-          name="q"
-          type="text"
-          defaultValue={q}
-          placeholder="ឈ្មោះ ឬ លេខកូដសិស្ស"
-          className="rounded-btn border-border bg-surface w-full border px-3 py-2 text-sm"
-        />
-      </div>
-
-      <div className="flex gap-2">
-        <button
-          type="submit"
-          className="touch-target rounded-btn bg-brand-600 flex-1 px-4 text-sm font-medium text-white active:bg-brand-700"
-        >
-          រក
-        </button>
-        <a
-          href={`/admin/students?year=${yearId}`}
-          className="touch-target rounded-btn border-border bg-surface flex items-center border px-4 text-sm active:bg-slate-50"
-        >
-          សម្អាត
-        </a>
+        <Button type="submit" className="h-11 px-6">រក</Button>
+        
+        {(q || activeClassId) && (
+          <a
+            href={`/admin/students?year=${yearId}`}
+            className="inline-flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 px-3 text-sm transition-colors"
+          >
+            សម្អាត
+          </a>
+        )}
       </div>
     </form>
   );

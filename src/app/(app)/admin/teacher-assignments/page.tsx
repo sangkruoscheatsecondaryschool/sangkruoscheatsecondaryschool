@@ -1,21 +1,16 @@
 import Link from "next/link";
 import { connection } from "next/server";
-import { AppShell } from "@/components/app-shell";
-import {
-  listAcademicYears,
-  getCurrentAcademicYear,
-} from "@/lib/admin/academic-years/queries";
-import {
-  listAssignmentsForYear,
-  listClassOptions,
-  listTeacherOptions,
-} from "@/lib/admin/teacher-assignments/queries";
+import { Plus } from "lucide-react";
+import { listAcademicYears, getCurrentAcademicYear } from "@/lib/admin/academic-years/queries";
+import { listAssignmentsForYear, listClassOptions, listTeacherOptions } from "@/lib/admin/teacher-assignments/queries";
 import { YearSwitcher } from "../classes/year-switcher";
 import { AssignmentCard } from "./assignment-card";
 import { AssignmentFilters } from "./assignment-filters";
+import { PageHeader } from "@/components/layout/page-header";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const instant = false;
-
 export const metadata = { title: "ការចាត់តាំងគ្រូ" };
 
 export default async function TeacherAssignmentsPage({
@@ -24,150 +19,89 @@ export default async function TeacherAssignmentsPage({
   searchParams: Promise<{ year?: string; teacher?: string; class?: string }>;
 }) {
   await connection();
-
   const sp = await searchParams;
-  const [years, current] = await Promise.all([
-    listAcademicYears(),
-    getCurrentAcademicYear(),
-  ]);
-
-  const requested = sp.year ? years.find((y) => y.id === sp.year) : null;
-  const activeYear = requested ?? current ?? years[0] ?? null;
+  const [years, current] = await Promise.all([listAcademicYears(), getCurrentAcademicYear()]);
+  const activeYear = (sp.year && years.find((y) => y.id === sp.year)) || current || years[0] || null;
 
   if (!activeYear) {
     return (
-      <AppShell title="ការចាត់តាំងគ្រូ" backHref="/admin">
-        <div className="rounded-card border border-dashed border-border bg-surface p-6 text-center">
-          <p className="text-muted text-sm">
-            សូមបង្កើតឆ្នាំសិក្សាជាមុនសិន។
-          </p>
-        </div>
-      </AppShell>
+      <div className="space-y-6">
+        <PageHeader title="ការចាត់តាំងគ្រូ" description="ចាត់តាំងគ្រូបង្រៀនតាមមុខវិជ្ជា និងថ្នាក់រៀន" />
+        <EmptyState title="មិនទាន់មានឆ្នាំសិក្សា" description="សូមបង្កើតឆ្នាំសិក្សាជាមុនសិន។" />
+      </div>
     );
   }
 
-  const [teachers, classes] = await Promise.all([
-    listTeacherOptions(),
-    listClassOptions(activeYear.id),
-  ]);
+  const [teachers, classes] = await Promise.all([listTeacherOptions(), listClassOptions(activeYear.id)]);
+  const validTeacherId = sp.teacher && teachers.some((t) => t.id === sp.teacher) ? sp.teacher : undefined;
+  const validClassId = sp.class && classes.some((c) => c.id === sp.class) ? sp.class : undefined;
 
-  const validTeacherId =
-    sp.teacher && teachers.some((t) => t.id === sp.teacher)
-      ? sp.teacher
-      : undefined;
-  const validClassId =
-    sp.class && classes.some((c) => c.id === sp.class) ? sp.class : undefined;
+  const assignments = await listAssignmentsForYear(activeYear.id, { teacherId: validTeacherId, classId: validClassId });
+  const groupBy = validTeacherId ? "class" : "teacher";
 
-  const assignments = await listAssignmentsForYear(activeYear.id, {
-    teacherId: validTeacherId,
-    classId: validClassId,
-  });
-
-  // Group by teacher unless a teacher filter is active (then group by class)
-  const groupBy: "teacher" | "class" = validTeacherId ? "class" : "teacher";
-
-  const groups = new Map<
-    string,
-    {
-      key: string;
-      label: string;
-      sub: string;
-      items: typeof assignments;
-    }
-  >();
+  const groups = new Map<string, { key: string; label: string; sub: string; items: typeof assignments }>();
   for (const a of assignments) {
     const key = groupBy === "teacher" ? a.teacher_id : a.class_id;
-    const label =
-      groupBy === "teacher" ? a.teacher_name_kh : a.class_name;
-    const sub =
-      groupBy === "teacher"
-        ? (a.teacher_name_en ?? "")
-        : `ថ្នាក់ទី ${a.grade_level}`;
+    const label = groupBy === "teacher" ? a.teacher_name_kh : a.class_name;
+    const sub = groupBy === "teacher" ? (a.teacher_name_en ?? "") : `ថ្នាក់ទី ${a.grade_level}`;
     const g = groups.get(key) ?? { key, label, sub, items: [] };
     g.items.push(a);
     groups.set(key, g);
   }
-
-  const grouped = Array.from(groups.values()).sort((a, b) =>
-    a.label.localeCompare(b.label, "km"),
-  );
+  const grouped = Array.from(groups.values()).sort((a, b) => a.label.localeCompare(b.label, "km"));
 
   return (
-    <AppShell title="ការចាត់តាំងគ្រូ" backHref="/admin">
+    <div className="space-y-6 animate-in fade-in duration-300">
+      <PageHeader 
+        title="ការចាត់តាំងគ្រូ" 
+        description="ចាត់តាំងគ្រូបង្រៀនតាមមុខវិជ្ជា និងថ្នាក់រៀន"
+        action={
+          <Link href={`/admin/teacher-assignments/manage?year=${activeYear.id}`}>
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              ចាត់តាំងគ្រូថ្មី
+            </Button>
+          </Link>
+        }
+      />
+
       <YearSwitcher years={years} activeYearId={activeYear.id} basePath="/admin/teacher-assignments" />
 
-      {teachers.length === 0 ? (
-        <div className="rounded-card border border-dashed border-border bg-surface p-6 text-center">
-          <p className="text-muted text-sm">
-            មិនមានគណនីគ្រូនៅឡើយទេ។ សូមបង្កើតគណនីគ្រូជាមុនសិន។
-          </p>
-        </div>
-      ) : classes.length === 0 ? (
-        <div className="rounded-card border border-dashed border-border bg-surface p-6 text-center">
-          <p className="text-muted text-sm">
-            មិនមានថ្នាក់រៀននៅក្នុងឆ្នាំ {activeYear.year_name} ទេ។
-          </p>
-          <Link
-            href={`/admin/classes/new?year=${activeYear.id}`}
-            className="text-brand-700 mt-3 inline-block text-sm underline-offset-4 hover:underline"
-          >
-            បង្កើតថ្នាក់ថ្មី
-          </Link>
-        </div>
+      {teachers.length === 0 || classes.length === 0 ? (
+        <EmptyState 
+          title="មិនទាន់មានទិន្នន័យ" 
+          description="អ្នកត្រូវមានគ្រូបង្រៀន និងថ្នាក់រៀនជាមុនសិន ទើបអាចចាត់តាំងបាន។"
+        />
       ) : (
         <>
-          <AssignmentFilters
-            teachers={teachers}
-            classes={classes}
-            activeTeacherId={validTeacherId ?? ""}
-            activeClassId={validClassId ?? ""}
-            yearId={activeYear.id}
-          />
-
-          <Link
-            href={`/admin/teacher-assignments/manage?year=${activeYear.id}`}
-            className="touch-target rounded-btn bg-brand-600 mb-4 flex w-full items-center justify-center px-4 font-medium text-white active:bg-brand-700"
-          >
-            + ចាត់តាំងគ្រូថ្មី
-          </Link>
-
+          <AssignmentFilters teachers={teachers} classes={classes} activeTeacherId={validTeacherId ?? ""} activeClassId={validClassId ?? ""} yearId={activeYear.id} />
+          
           {assignments.length === 0 ? (
-            <div className="rounded-card border border-dashed border-border bg-surface p-6 text-center">
-              <p className="text-muted text-sm">រកមិនឃើញការចាត់តាំង។</p>
-            </div>
+            <EmptyState title="រកមិនឃើញការចាត់តាំង" description="មិនមានទិន្នន័យត្រូវនឹងលក្ខខណ្ឌស្វែងរក។" />
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-8">
               {grouped.map((g) => (
                 <section key={g.key}>
-                  <div className="mb-2 flex items-start justify-between gap-2">
+                  <div className="flex items-start justify-between gap-2 mb-3">
                     <div>
-                      <h2 className="font-moul text-sm">{g.label}</h2>
-                      {g.sub ? (
-                        <p className="text-muted text-xs">{g.sub}</p>
-                      ) : null}
+                      <h2 className="font-moul text-lg text-slate-800">{g.label}</h2>
+                      {g.sub && <p className="text-slate-500 text-sm mt-0.5">{g.sub}</p>}
                     </div>
-                    {groupBy === "teacher" ? (
-                      <Link
-                        href={`/admin/teacher-assignments/manage?year=${activeYear.id}&teacher=${g.key}`}
-                        className="touch-target rounded-btn border-border bg-surface border px-3 text-xs active:bg-slate-50"
-                      >
-                        កែប្រែ
+                    {groupBy === "teacher" && (
+                      <Link href={`/admin/teacher-assignments/manage?year=${activeYear.id}&teacher=${g.key}`}>
+                        <Button variant="outline" size="sm">កែប្រែ</Button>
                       </Link>
-                    ) : null}
+                    )}
                   </div>
-                  <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    {g.items.map((a) => (
-                      <li key={a.id}>
-                        <AssignmentCard row={a} />
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {g.items.map((a) => <AssignmentCard key={a.id} row={a} />)}
+                  </div>
                 </section>
               ))}
             </div>
           )}
         </>
       )}
-    </AppShell>
+    </div>
   );
 }

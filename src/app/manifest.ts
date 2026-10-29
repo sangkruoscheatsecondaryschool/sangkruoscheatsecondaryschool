@@ -2,10 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "School Management System",
-    short_name: "School",
-    description:
-      "School management system for Cambodian high schools — scores, attendance, report cards.",
+    name: "ប្រព័ន្ធគ្រប់គ្រងសាលាអ.ស.ជ",
+    short_name: "SKC School App",
+    description: "ប្រព័ន្ធគ្រប់គ្រងសាលារៀន",
     start_url: "/",
     scope: "/",
     display: "standalone",
@@ -16,25 +15,19 @@ export default function manifest(): MetadataRoute.Manifest {
     dir: "ltr",
     icons: [
       {
-        src: "/icons/192",
+        src: "/icon-192.png",
         sizes: "192x192",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/icons/512",
+        src: "/icon-512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/icons/192?purpose=maskable",
-        sizes: "192x192",
-        type: "image/png",
-        purpose: "maskable",
-      },
-      {
-        src: "/icons/512?purpose=maskable",
+        src: "/icon-512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",
